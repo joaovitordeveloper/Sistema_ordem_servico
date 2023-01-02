@@ -1,0 +1,4 @@
+# comandos 
+utilizar o php spark para ver a lista de comandos que podem ser utilizados
+
+php spark migrate executa os arquivos e quando não existir nenhum ele ira criar a tabela no bancop chamada migrations
