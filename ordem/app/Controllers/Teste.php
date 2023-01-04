@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\CorModel;
 
 class Teste extends BaseController
 {
@@ -16,6 +17,11 @@ class Teste extends BaseController
 
     public function minha()
     {
-        echo "esse e o metodo minha";
+        $corModel = new CorModel();
+        $data = [
+            'titulo' => 'Buscando dados no banco',
+            'cores'  => $corModel->findAll()
+        ];
+        return view('minha', $data);
     }
 }
