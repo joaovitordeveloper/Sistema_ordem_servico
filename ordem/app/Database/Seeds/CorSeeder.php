@@ -13,31 +13,38 @@ class CorSeeder extends Seeder
 
         $cores = [
             [
-                'nome' => 'Amarela'
+                'nome' => 'Amarela',
+                'descricao' => 'Descricao da cor'
             ],
 
             [
-                'nome' => 'Azul'
+                'nome' => 'Azul',
+                'descricao' => 'Descricao da cor'
             ],
 
             [
-                'nome' => 'Roxo'
+                'nome' => 'Roxo',
+                'descricao' => 'Descricao da cor'
             ],
 
             [
-                'nome' => 'Vermelho'
+                'nome' => 'Vermelho',
+                'descricao' => 'Descricao da cor'
             ],
 
             [
-                'nome' => 'Verde'
+                'nome' => 'Verde',
+                'descricao' => 'Descricao da cor'
             ],
 
             [
-                'nome' => 'Lilas'
+                'nome' => 'Lilas',
+                'descricao' => 'Descricao da cor'
             ],
 
             [
-                'nome' => 'Amarela'
+                'nome' => 'Amarela',
+                'descricao' => 'Descricao da cor'
             ]
         ];
 

@@ -20,7 +20,7 @@ class Teste extends BaseController
         $corModel = new CorModel();
         $data = [
             'titulo' => 'Buscando dados no banco',
-            'cores'  => $corModel->findAll()
+            'cores'  => $corModel->where('ativa', true)->findAll(1)
         ];
         return view('minha', $data);
     }
