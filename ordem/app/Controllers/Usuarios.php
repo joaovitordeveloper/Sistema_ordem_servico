@@ -42,16 +42,44 @@ class Usuarios extends BaseController
         $usuarios = $this->usuarioModel->select($atributos)->findAll();
         //recebera o array de objetos para retornar conforme a documentação do dataTable
         $data = [];
-        
+
         foreach ($usuarios as $usuario) {
-           $data[] = [
+            $data[] = [
                 'imagem' => $usuario->imagem,
-                'nome'   => esc($usuario->nome),//função esc para validar caracteres especiais propria do CI4
-                'email'  => esc($usuario->email),
-                'ativo'  => ($usuario->ativo == true ? 'Ativo' : '<span class = "text-warning">Inativo</span>')
-           ]; 
+                'nome'   => \anchor("usuarios/exibir/$usuario->id", esc($usuario->nome), 'title="Exibir usuário ' . esc($usuario->nome) . '""'),
+                'email'  => esc($usuario->email), //função esc para validar caracteres especiais propria do CI4
+                'ativo'  => ($usuario->ativo == true ? '<i class="fa fa-unlock-alt text-success"></i>&nbsp;Ativo' : '<i class="fa fa-lock text-warning"></i>&nbsp;Inativo')
+            ];
         }
 
         return $this->response->setJSON(['data' => $data]);
+    }
+
+    public function exibir(int $id = null)
+    {
+        $usuario = $this->buscaUsuarioOu404($id);
+        $data = [
+            'titulo'  => "Detalhando o usuário " . \esc($usuario->nome),
+            'usuario' => $usuario
+        ];
+
+        return \view('Usuarios/exibir', $data);
+    }
+
+    /**
+     * Metodo que recupera o usuario.
+     *
+     * @param integer|null $id
+     * @return void
+     */
+    private function buscaUsuarioOu404(int $id = null)
+    {
+        //o metodo withDeleted busca todos os dados até mesmo os excluidos
+        if(!$id || !$usuario = $this->usuarioModel->withDeleted(true)->find($id))
+        {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Não encontramos o usuário $id");
+        }
+
+        return $usuario;
     }
 }
