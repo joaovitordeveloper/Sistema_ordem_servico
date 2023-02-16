@@ -58,8 +58,9 @@ class Usuarios extends BaseController
     public function exibir(int $id = null)
     {
         $usuario = $this->buscaUsuarioOu404($id);
+        \dd($usuario);
         $data = [
-            'titulo'  => "Detalhando o usuário " . \esc($usuario->nome),
+            'titulo'  => "Detalhando o usuário " . esc($usuario->nome),
             'usuario' => $usuario
         ];
 
@@ -75,8 +76,7 @@ class Usuarios extends BaseController
     private function buscaUsuarioOu404(int $id = null)
     {
         //o metodo withDeleted busca todos os dados até mesmo os excluidos
-        if(!$id || !$usuario = $this->usuarioModel->withDeleted(true)->find($id))
-        {
+        if (!$id || !$usuario = $this->usuarioModel->withDeleted(true)->find($id)) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Não encontramos o usuário $id");
         }
 
