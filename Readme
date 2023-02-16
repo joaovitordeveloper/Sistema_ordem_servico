@@ -1,4 +1,6 @@
 # comandos 
-utilizar o php spark para ver a lista de comandos que podem ser utilizados
+utilizar o php spark para ver a lista de comandos que podem ser utilizados.
 
-php spark migrate executa os arquivos e quando não existir nenhum ele ira criar a tabela no bancop chamada migrations
+php spark migrate executa os arquivos e quando não existir nenhum ele ira criar a tabela no bancop chamada migrations.
+
+php spark make:entity Usuario cria a classe de entidades para ajudar na regra do negocio.
