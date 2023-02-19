@@ -35,8 +35,8 @@
 
             <h5 class="card-title mt-2"><?php echo esc($usuario->nome); ?></h5>
             <p class="card-text"> <?php echo  esc($usuario->email); ?></p>
-            <p class="card-text">Criado <?php echo $usuario->criado_em; ?></p>
-            <p class="card-text">Atualizado <?php echo $usuario->atualizado_em; ?></p>
+            <p class="card-text">Criado <?php echo $usuario->criado_em->humanize(); ?></p>
+            <p class="card-text">Atualizado <?php echo $usuario->atualizado_em->humanize(); ?></p>
 
             <!-- Example single danger button -->
             <div class="btn-group">

@@ -58,13 +58,45 @@ class Usuarios extends BaseController
     public function exibir(int $id = null)
     {
         $usuario = $this->buscaUsuarioOu404($id);
-        \dd($usuario);
         $data = [
             'titulo'  => "Detalhando o usuário " . esc($usuario->nome),
             'usuario' => $usuario
         ];
 
         return \view('Usuarios/exibir', $data);
+    }
+
+    public function editar(int $id = null)
+    {
+        $usuario = $this->buscaUsuarioOu404($id);
+        $data = [
+            'titulo'  => "Editando o usuário " . esc($usuario->nome),
+            'usuario' => $usuario
+        ];
+
+        return \view('Usuarios/editar', $data);
+    }
+
+    public function atualizar()
+    {
+        //valida se e uma requisição via ajax
+        if (!$this->request->isAJAX()) {
+            return \redirect()->back();
+        }
+
+        $retorno['token'] = csrf_hash();
+        $retorno['erro'] = "Essa é uma mensagem de erro de validação";
+        $retorno['erros_model'] = [
+            'nome' => 'O nome é obrigatorio',
+            'email' => 'Email invalido',
+            'password' => 'A senha é muito curta',
+        ];
+
+        return $this->response->setJSON($retorno);
+
+        $post = $this->request->getPost();
+        echo '<pre>';
+        print_r($post);exit;
     }
 
     /**
