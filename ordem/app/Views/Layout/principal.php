@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
-  <head> 
+  <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Ordem de Serviço | <?php $this->renderSection('titulo'); ?> </title>
+    <title>Ordem de Serviço | <?php $this->renderSection('titulo');?> </title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="all,follow">
@@ -26,11 +26,11 @@
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
 
     <!-- Espaço reservado para renderizar o estilo de cada view que estender esse layout -->
-    <?php $this->renderSection('estilos'); ?>
+    <?php echo $this->renderSection('estilos');?>
 
   </head>
   <body>
-    <header class="header">   
+    <header class="header">
       <nav class="navbar navbar-expand-lg">
         <div class="search-panel">
           <div class="search-inner d-flex align-items-center justify-content-center">
@@ -51,7 +51,7 @@
             <!-- Sidebar Toggle Btn-->
             <button class="sidebar-toggle"><i class="fa fa-long-arrow-left"></i></button>
           </div>
-          <div class="right-menu list-inline no-margin-bottom">    
+          <div class="right-menu list-inline no-margin-bottom">
             <div class="list-inline-item"><a href="#" class="search-open nav-link"><i class="icon-magnifying-glass-browser"></i></a></div>
             <div class="list-inline-item dropdown"><a id="navbarDropdownMenuLink1" href="http://example.com" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link messages-toggle"><i class="icon-email"></i><span class="badge dashbg-1">5</span></a>
               <div aria-labelledby="navbarDropdownMenuLink1" class="dropdown-menu messages"><a href="#" class="dropdown-item message d-flex align-items-center">
@@ -214,12 +214,14 @@
         <section class="no-padding-top no-padding-bottom">
 
             <div class="container-fluid">
+                <!--Abaixo temos o include para o retorno das mensagens para apresentação ao usuario final-->
+                <?php echo $this->include('Layout/_mensagens.php')?>
                 <!-- Espaço reservado para renderizar o conteúdo de cada view que estender esse layout -->
-                <?php $this->renderSection('conteudo'); ?>
+                <?php echo $this->renderSection('conteudo');?>
             </div>
-          
+
         </section>
-        
+
         <footer class="footer">
           <div class="footer__block block no-margin-bottom">
             <div class="container-fluid text-center">
@@ -236,6 +238,6 @@
     <script src="<?php echo site_url('recursos/') ?>vendor/bootstrap/js/bootstrap.min.js"></script>
     <script src="<?php echo site_url('recursos/') ?>js/front.js"></script>
     <!-- Espaço reservado para renderizar os scripts de cada view que estender esse layout -->
-    <?php $this->renderSection('scripts'); ?>
+    <?php echo $this->renderSection('scripts');?>
   </body>
 </html>

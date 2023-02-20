@@ -84,19 +84,34 @@ class Usuarios extends BaseController
             return \redirect()->back();
         }
 
+        //envio do hash do token do form.
         $retorno['token'] = csrf_hash();
-        $retorno['erro'] = "Essa é uma mensagem de erro de validação";
-        $retorno['erros_model'] = [
-            'nome' => 'O nome é obrigatorio',
-            'email' => 'Email invalido',
-            'password' => 'A senha é muito curta',
-        ];
 
-        return $this->response->setJSON($retorno);
-
+        //pegando os dados da requisição.
         $post = $this->request->getPost();
-        echo '<pre>';
-        print_r($post);exit;
+        $usuario = $this->buscaUsuarioOu404($post['id']);
+
+        if(empty($post['password'])){
+            unset($post['password']);
+            unset($post['password_confirmation']);
+        }
+
+        $usuario->fill($post);//preenchendo os atributos do usuario.
+
+        if($usuario->hasChanged() == false){
+            $retorno['info'] = 'Não há dados para serem atualizados';
+            return $this->response->setJSON($retorno);
+        }
+
+        if($this->usuarioModel->protect(false)->save($usuario)){
+            session()->setFlashdata('sucesso', 'Dados salvos com sucesso!');
+            return $this->response->setJSON($retorno);
+        }
+
+        $retorno['erro'] = 'Por favor verifique os erros abaixo e tente novamente.';
+        $retorno['erros_model'] = $this->usuarioModel->errors();
+       
+        return $this->response->setJSON($retorno);
     }
 
     /**
