@@ -57,7 +57,7 @@
 
             $.ajax({
                 type: 'POST',
-                url: '<?php echo site_url('usuarios/atualizar'); ?>',
+                url: '<?php echo site_url('usuarios/upload'); ?>',
                 data: new FormData(this),
                 dataType: 'json',
                 contentType: false,
@@ -73,13 +73,7 @@
                     $('[name=csrf_ordem]').val(response.token);
 
                     if(!response.erro){
-
-                        if(response.info){
-                            $("#response").html('<div class="alert alert-info">' + response.info + '</div>');
-                        }else{
-                            //tudo certo na atualização do usuario.
-                            window.location.href = "<?php echo site_url("usuarios/exibir/$usuario->id")?>"
-                        }
+                        window.location.href = "<?php echo site_url("usuarios/exibir/$usuario->id")?>"
                     }
 
                     if(response.erro){
