@@ -17,7 +17,7 @@
 <?php endif;?>
 
 <?php if (session()->has('atencao')): ?>
-    <div class="alert alert-info alert-dismissible fade show" role="alert">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
         <strong>Atenção!</strong> <?php echo session('atencao') ?>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
