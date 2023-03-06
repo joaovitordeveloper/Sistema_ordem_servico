@@ -32,6 +32,7 @@ class UsuarioModel extends Model
         'password'     => 'required|min_length[6]',
         'password_confirmation' => 'required_with[password]|matches[password]',
     ];
+    
     protected $validationMessages = [
         'nome' => [
             'required' => 'O campo Nome e obrigatório.',
