@@ -19,7 +19,7 @@
 
 <div class="row">
     <div class="col-lg-3">
-        <div class="block">
+        <div class="user-block block">
             <div class="text-center">
                 <?php if ($usuario->imagem == null) : ?>
                     <img src="<?php echo site_url('recursos/img/usuario_sem_imagem.png'); ?>" class="card-img-top" style="width: 90%;" alt="Usuário sem imagem">
@@ -35,7 +35,7 @@
 
             <h5 class="card-title mt-2"><?php echo esc($usuario->nome); ?></h5>
             <p class="card-text"> <?php echo esc($usuario->email); ?></p>
-            <p class="card-text"> <?php echo $usuario->exibeSituacao(); ?></p>
+            <p class="contributions mt-0"> <?php echo $usuario->exibeSituacao(); ?></p>
             <p class="card-text">Criado <?php echo $usuario->criado_em->humanize(); ?></p>
             <p class="card-text">Atualizado <?php echo $usuario->atualizado_em->humanize(); ?></p>
 

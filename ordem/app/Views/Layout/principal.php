@@ -26,7 +26,7 @@
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
 
     <!-- Espaço reservado para renderizar o estilo de cada view que estender esse layout -->
-    <?php echo $this->renderSection('estilos');?>
+    <?php echo $this->renderSection('estilos'); ?>
 
   </head>
   <body>
@@ -187,6 +187,7 @@
         <ul class="list-unstyled">
                 <li class="<?php echo (url_is('/') ? 'active' : '') ?>"><a href="<?php echo site_url('/'); ?>"> <i class="icon-home"></i>Home </a></li>
                 <li class="<?php echo (url_is('usuarios*') ? 'active' : '') ?>"><a href="<?php echo site_url('usuarios'); ?>"> <i class="icon-user"></i>Usuários </a></li>
+                <li class="<?php echo (url_is('grupos*') ? 'active' : '') ?>"><a href="<?php echo site_url('grupos'); ?>"> <i class="icon-settings"></i>Grupos & Permissões </a></li>
                 <li><a href="charts.html"> <i class="fa fa-bar-chart"></i>Charts </a></li>
                 <li><a href="forms.html"> <i class="icon-padnote"></i>Forms </a></li>
                 <li><a href="#exampledropdownDropdown" aria-expanded="false" data-toggle="collapse"> <i class="icon-windows"></i>Example dropdown </a>
@@ -215,9 +216,9 @@
 
             <div class="container-fluid">
                 <!--Abaixo temos o include para o retorno das mensagens para apresentação ao usuario final-->
-                <?php echo $this->include('Layout/_mensagens.php')?>
+                <?php echo $this->include('Layout/_mensagens.php') ?>
                 <!-- Espaço reservado para renderizar o conteúdo de cada view que estender esse layout -->
-                <?php echo $this->renderSection('conteudo');?>
+                <?php echo $this->renderSection('conteudo'); ?>
             </div>
 
         </section>
@@ -238,6 +239,14 @@
     <script src="<?php echo site_url('recursos/') ?>vendor/bootstrap/js/bootstrap.min.js"></script>
     <script src="<?php echo site_url('recursos/') ?>js/front.js"></script>
     <!-- Espaço reservado para renderizar os scripts de cada view que estender esse layout -->
-    <?php echo $this->renderSection('scripts');?>
+    <?php echo $this->renderSection('scripts'); ?>
+
+    <script>
+      $(function () {
+        $('[data-toggle="popover"]').popover({
+          html: true,
+        })
+      })
+    </script>
   </body>
 </html>
