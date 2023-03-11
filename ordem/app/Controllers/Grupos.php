@@ -86,7 +86,7 @@ class Grupos extends BaseController
      * Metodo que recupera o grupo de acesso.
      *
      * @param integer|null $id
-     * @return void
+     * @return obeject
      */
     private function buscaGrupoOu404(int $id = null)
     {

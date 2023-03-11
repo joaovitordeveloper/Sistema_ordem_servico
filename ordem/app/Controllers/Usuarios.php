@@ -371,7 +371,7 @@ class Usuarios extends BaseController
      * Metodo que recupera o usuario.
      *
      * @param integer|null $id
-     * @return void
+     * @return obeject
      */
     private function buscaUsuarioOu404(int $id = null)
     {
