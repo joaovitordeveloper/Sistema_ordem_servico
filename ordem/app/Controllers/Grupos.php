@@ -75,16 +75,187 @@ class Grupos extends BaseController
     {
         $grupo = $this->buscaGrupoOu404($id);
         $data = [
-            'titulo' => "Detalhando o grupo de acesso" . esc($grupo->nome),
+            'titulo' => "Detalhando o grupo de acesso " . esc($grupo->nome),
             'grupo' => $grupo,
         ];
 
         return \view('Grupos/exibir', $data);
     }
 
+     /**
+     * Função para fazer a chamada da exibição da view de edição dos grupos
+     *
+     * @param integer|null $id
+     * @return void
+     */
+    public function editar(int $id = null)
+    {
+        $grupo = $this->buscaGrupoOu404($id);
+
+        //validando se não ha manipulação de usuário.
+        if ($grupo->id < 3) {
+            return \redirect()->back()->with('atencao', 'O grupo <b>' . \esc($grupo->nome) . '</b> não pode ser editado ou excluido, conforme detalhado na exibição do mesmo');
+        }
+
+        $data = [
+            'titulo' => "Editando o grupo de acesso " . esc($grupo->nome),
+            'grupo' => $grupo,
+        ];
+
+        return \view('Grupos/editar', $data);
+    }
+
+    /**
+     * Função para fazer o tratamento dos dados e atualizar o grupo de acesso.
+     *
+     * @return void
+     */
+    public function atualizar()
+    {
+        //valida se e uma requisição via ajax
+        if (!$this->request->isAJAX()) {
+            return \redirect()->back();
+        }
+
+        //envio do hash do token do form.
+        $retorno['token'] = csrf_hash();
+
+        //pegando os dados da requisição.
+        $post = $this->request->getPost();
+        $grupo = $this->buscaGrupoOu404($post['id']);
+
+        //validando se não ha manipulação de usuário.
+        if ($grupo->id < 3) {
+        
+            $retorno['erro'] = 'Por favor verifique os erros abaixo e tente novamente.';
+            $retorno['erros_model'] = ['grupo' => 'O grupo <b>' . \esc($grupo->nome) . '</b> não pode ser editado ou excluido, conforme detalhado na exibição do mesmo'];
+
+            return $this->response->setJSON($retorno);
+        }
+
+        $grupo->fill($post); //preenchendo os atributos do grupo.
+
+        if ($grupo->hasChanged() == false) {
+            $retorno['info'] = 'Não há dados para serem atualizados';
+            return $this->response->setJSON($retorno);
+        }
+
+        if ($this->grupoModel->protect(false)->save($grupo)) {
+            session()->setFlashdata('sucesso', 'Dados salvos com sucesso!');
+            return $this->response->setJSON($retorno);
+        }
+
+        $retorno['erro'] = 'Por favor verifique os erros abaixo e tente novamente.';
+        $retorno['erros_model'] = $this->grupoModel->errors();
+
+        return $this->response->setJSON($retorno);
+    }
+
+     /**
+     * Função para fazer a chamada da exibição da view de criação dos grupos
+     *
+     * @param integer|null $id
+     * @return void
+     */
+    public function criar()
+    {
+        $grupo = new Grupo();
+        $data = [
+            'titulo' => "Criando um novo grupo de acesso",
+            'grupo' => $grupo,
+        ];
+
+        return \view('Grupos/criar', $data);
+    }
+
+    /**
+     * Função para tratar os dados e realizar o cadastro de um novo grupo de acesso.
+     *
+     * @return void
+     */
+    public function cadastrar()
+    {
+        //valida se e uma requisição via ajax
+        if (!$this->request->isAJAX()) {
+            return \redirect()->back();
+        }
+
+        //envio do hash do token do form.
+        $retorno['token'] = csrf_hash();
+
+        //pegando os dados da requisição.
+        $post = $this->request->getPost();
+        $grupo = new Grupo($post); //criando novo objeto da entidade grupo
+
+        if ($this->grupoModel->save($grupo)) {
+            $btnCriar = anchor("grupos/criar", 'Novo Grupo', ['class' => 'btn btn-danger mt-2']);
+            session()->setFlashdata('sucesso', "Dados salvos com sucesso!<br> $btnCriar");
+            $retorno['id'] = $this->grupoModel->getInsertID(); //retorna o ultimo id inserido na tabela.
+            return $this->response->setJSON($retorno);
+        }
+
+        $retorno['erro'] = 'Por favor verifique os erros abaixo e tente novamente.';
+        $retorno['erros_model'] = $this->grupoModel->errors();
+
+        return $this->response->setJSON($retorno);
+    }
+
+     /**
+     * De acordo com o metodo passado realiza a função de exibir a view de excluir o grupo ou realiza a propria exclusão do grupo.
+     *
+     * @param integer|null $id
+     * @return void
+     */
+    public function excluir(int $id = null)
+    {
+        $grupo = $this->buscaGrupoOu404($id);
+
+        //validando se não ha manipulação de usuário.
+        if ($grupo->id < 3) {
+            return \redirect()->back()->with('atencao', 'O grupo <b>' . \esc($grupo->nome) . '</b> não pode ser editado ou excluido, conforme detalhado na exibição do mesmo');
+        }
+
+        if ($grupo->deletado_em != null) {
+            return redirect()->back()->with('info', "Esse grupo já encontra-se excluido");
+        }
+
+        if ($this->request->getMethod() === 'post') {
+
+            $this->grupoModel->delete($grupo->id);
+            //retorno a baixo so funciona quando não e utilizado ajax request
+            return redirect()->to(\site_url("grupos"))->with('sucesso', 'Grupo ' . esc($grupo->nome) . ' excluido com sucesso!');
+        }
+
+        $data = [
+            'titulo' => "Excluindo o grupo de acesso " . esc($grupo->nome),
+            'grupo' => $grupo,
+        ];
+
+        return \view('Grupos/excluir', $data);
+    }
+
+    /**
+     * Recupera o grupo que já foi deletado.
+     *
+     * @param integer|null $id
+     * @return void
+     */
+    public function restaurarGrupo(int $id = null)
+    {
+        $grupo = $this->buscaGrupoOu404($id);
+
+        if ($grupo->deletado_em == null) {
+            return redirect()->back()->with('info', "Apenas grupos excluidos podem ser recuperados");
+        }
+
+        $grupo->deletado_em = null;
+        $this->grupoModel->protect(false)->save($grupo);
+
+        return redirect()->back()->with('sucesso', 'Grupo ' . esc($grupo->nome) . ' excluido com sucesso!');
+    }
+
     /**
      * Metodo que recupera o grupo de acesso.
-     *
      * @param integer|null $id
      * @return obeject
      */

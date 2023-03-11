@@ -9,7 +9,11 @@ class GrupoModel extends Model
     protected $table = 'grupos';
     protected $returnType = 'App\Entities\Grupo';
     protected $useSoftDeletes = true;
-    protected $allowedFields = ['nome', 'descricao', 'exibir'];
+    protected $allowedFields = [
+        'nome',
+        'descricao',
+        'exibir',
+    ];
 
     // Dates
     protected $useTimestamps = true;
@@ -18,13 +22,13 @@ class GrupoModel extends Model
     protected $deletedField = 'deletado_em';
 
     protected $validationRules = [
-        'nome' => 'required||max_length[125]|is_unique[grupos.nome,id,{id}]',
+        'nome' => 'required|max_length[125]|is_unique[grupos.nome,id,{id}]',
         'descricao' => 'required|max_length[240]',
     ];
 
     protected $validationMessages = [
         'nome' => [
-            'required' => 'O campo Nome e obrigatório.',
+            'required' => 'O grupo de acesso com esse nome já existe, por favor escolha outro. ',
         ],
     ];
 }
