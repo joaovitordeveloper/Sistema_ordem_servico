@@ -5,14 +5,17 @@ namespace App\Controllers;
 use App\Entities\Grupo;
 use App\Models\GrupoModel;
 use App\Controllers\BaseController;
+use App\Models\GrupoPermissaoModel;
 
 class Grupos extends BaseController
 {
     private $grupoModel;
+    private $grupoPermissaoModel;
 
     public function __construct()
     {
         $this->grupoModel = new GrupoModel();
+        $this->grupoPermissaoModel = new GrupoPermissaoModel();
     }
 
    /**
@@ -255,9 +258,42 @@ class Grupos extends BaseController
     }
 
     /**
+     * Função para fazer a chamada da exibição da view de gerenciamento de permissões dos grupos de acesso.
+     *
+     * @param integer|null $id
+     * @return void
+     */
+    public function permissoes(int $id = null)
+    {
+        $grupo = $this->buscaGrupoOu404($id);
+        //grupo administrador
+        if ($grupo->id == 1) {
+            return \redirect()->back()->with('info', 'Não e necessário atribuir ou remover permissões de acesso para o grupo <b>' . \esc($grupo->nome) . '</b>, pois esse grupo é Administrador.');
+        }
+        //grupo de clientes
+        if ($grupo->id == 2) {
+            return \redirect()->back()->with('info', 'Não e necessário atribuir ou remover permissões de acesso para o grupo de Clientes.');
+        }
+
+        if ($grupo->id > 2) {
+            $grupo->permissoes = $this->grupoPermissaoModel->recuperaPermissoesDoGrupo($grupo->id, 5);
+            $grupo->pager = $this->grupoPermissaoModel->pager;
+        }
+
+        dd($grupo);
+
+        $data = [
+            'titulo' => "Gerenciando as permissões grupo de acesso " . esc($grupo->nome),
+            'grupo' => $grupo,
+        ];
+
+        return \view('Grupos/permissoes', $data);
+    }
+
+    /**
      * Metodo que recupera o grupo de acesso.
      * @param integer|null $id
-     * @return obeject
+     * @return object
      */
     private function buscaGrupoOu404(int $id = null)
     {
