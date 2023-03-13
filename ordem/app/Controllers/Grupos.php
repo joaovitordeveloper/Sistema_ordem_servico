@@ -6,16 +6,19 @@ use App\Entities\Grupo;
 use App\Models\GrupoModel;
 use App\Controllers\BaseController;
 use App\Models\GrupoPermissaoModel;
+use App\Models\PermissaoModel;
 
 class Grupos extends BaseController
 {
     private $grupoModel;
     private $grupoPermissaoModel;
+    private $permissaoModel;
 
     public function __construct()
     {
         $this->grupoModel = new GrupoModel();
         $this->grupoPermissaoModel = new GrupoPermissaoModel();
+        $this->permissaoModel = new PermissaoModel();
     }
 
    /**
@@ -280,12 +283,17 @@ class Grupos extends BaseController
             $grupo->pager = $this->grupoPermissaoModel->pager;
         }
 
-        dd($grupo);
-
         $data = [
             'titulo' => "Gerenciando as permissões grupo de acesso " . esc($grupo->nome),
             'grupo' => $grupo,
         ];
+
+        if (!empty($grupo->permissoes)) {
+            $permissoesExistentes = \array_column($grupo->permissoes, 'permissao_id'); 
+            $data['permissoesDisponiveis'] = $this->permissaoModel->whereNotIn('id', $permissoesExistentes)->findAll();//buscando as permissões que o usuário ainda não possui
+        }else{
+            $data['permissoesDisponiveis'] = $this->permissaoModel->findAll();
+        }
 
         return \view('Grupos/permissoes', $data);
     }
