@@ -11,7 +11,27 @@
 <!-- Estilos da pagina -->
 <?php $this->section('estilos');?>
 
+    <link rel="stylesheet" type="text/css" href="<?php echo site_url('recursos/vendor/selectize/selectize.bootstrap4.css') ?>" />
+    <style>
+        /* Estilizando o select para acompanhar a formatação do template */
 
+        .selectize-input,
+        .selectize-control.single .selectize-input.input-active {
+            background: #2d3035 !important;
+        }
+
+        .selectize-dropdown,
+        .selectize-input,
+        .selectize-input input {
+            color: #777;
+        }
+
+        .selectize-input {
+            /*        height: calc(2.4rem + 2px);*/
+            border: 1px solid #444951;
+            border-radius: 0;
+        }
+    </style>
 
 <?php $this->endSection();?>
 
@@ -35,7 +55,7 @@
 
                 <div class="form-group">
                     <label class="form-control-label">Escolha uma ou mais permissões</label>
-                    <select name="permissao_id[]" class="form-control" multiple>
+                    <select name="permissao_id[]" class="selectize" multiple>
                         <option value="">Selecione...</option>
                         <?php foreach($permissoesDisponiveis as $permissao): ?>
                             <option value="<?php echo $permissao->id ?>"> <?php echo esc($permissao->nome) ?> </option>
@@ -74,7 +94,16 @@
                             <?php foreach($grupo->permissoes as $permissao): ?>
                                 <tr>
                                     <td><?php echo esc($permissao->nome) ?></td>
-                                    <td><a href="#" class="btn btn-sm btn-danger">Excluir</a></td>
+                                    <td>
+                                        <?php 
+                                            $atributos = [
+                                                'onSubmit' => "return confirm('Tem certeza que deseja excluir a permissão?');",
+                                            ]; 
+                                        ?>
+                                        <?php echo form_open("grupos/removePermissao/$permissao->grupo_permissao_id", $atributos); ?>
+                                            <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                                        <?php echo form_close(); ?>    
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>    
                         </tbody>
@@ -96,6 +125,61 @@
 <!-- Scripts da pagina -->
 <?php $this->section('scripts');?>
 
+    <script type="text/javascript" src="<?php echo site_url('recursos/vendor/selectize/selectize.min.js') ?>"></script>  
+    <script>
+        $(document).ready(function () {
+            $(".selectize").selectize({
+                create: true,
+                sortField: "text"
+            });
 
+                $("#form").on('submit', function(e){
+                    e.preventDefault();
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '<?php echo site_url('grupos/salvarPermissoes'); ?>',
+                        data: new FormData(this),
+                        dataType: 'json',
+                        contentType: false,
+                        cache: false,
+                        processData: false,
+                        beforeSend: function(){
+                            $("#response").html('');
+                            $("#btn-salvar").val('Por favor aguarde...');
+                        },
+                        success: function(response){
+                            $("#btn-salvar").val('Salvar');
+                            $("#btn-salvar").removeAttr("disabled");
+                            $('[name=csrf_ordem]').val(response.token);
+
+                            if(!response.erro){
+                                //tudo certo na atualização do grupo.
+                                window.location.href = "<?php echo site_url("grupos/permissoes/$grupo->id")?>";
+                            }
+
+                            if(response.erro){
+                                $("#response").html('<div class="alert alert-danger">' + response.erro + '</div>');
+
+                                if(response.erros_model){
+                                    $.each(response.erros_model, function(key, value){
+                                        $("#response").append('<ul class="list-unstyled"><li class="text-danger">'+ value +'</li></ul>')
+                                    });
+                                }
+                            }
+                        },
+                        error: function(){
+                            alert('Não foi possivel processar a solicitação. Por favor entre em contato com o suporte técnico.');
+                            $("#btn-salvar").val('Salvar');
+                            $("#btn-salvar").removeAttr("disabled");
+                        }
+                    });
+            })
+        
+            $("#form").submit(function(){
+                $(this).find(":submit").attr('disabled', 'disabled');
+            })
+        })  
+    </script>                            
 
 <?php $this->endSection();?>

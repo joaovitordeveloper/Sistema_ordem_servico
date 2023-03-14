@@ -2,9 +2,9 @@
 
 namespace App\Controllers;
 
+use App\Controllers\BaseController;
 use App\Entities\Grupo;
 use App\Models\GrupoModel;
-use App\Controllers\BaseController;
 use App\Models\GrupoPermissaoModel;
 use App\Models\PermissaoModel;
 
@@ -21,7 +21,7 @@ class Grupos extends BaseController
         $this->permissaoModel = new PermissaoModel();
     }
 
-   /**
+    /**
      * Função de inicio do controller que retorna a pagina inicial do modulo
      *
      * @return void
@@ -71,7 +71,7 @@ class Grupos extends BaseController
         return $this->response->setJSON(['data' => $data]);
     }
 
-     /**
+    /**
      * Função para fazer a chamada da exibição da view de exibição dos grupos
      *
      * @param integer|null $id
@@ -88,7 +88,7 @@ class Grupos extends BaseController
         return \view('Grupos/exibir', $data);
     }
 
-     /**
+    /**
      * Função para fazer a chamada da exibição da view de edição dos grupos
      *
      * @param integer|null $id
@@ -132,7 +132,7 @@ class Grupos extends BaseController
 
         //validando se não ha manipulação de usuário.
         if ($grupo->id < 3) {
-        
+
             $retorno['erro'] = 'Por favor verifique os erros abaixo e tente novamente.';
             $retorno['erros_model'] = ['grupo' => 'O grupo <b>' . \esc($grupo->nome) . '</b> não pode ser editado ou excluido, conforme detalhado na exibição do mesmo'];
 
@@ -157,7 +157,7 @@ class Grupos extends BaseController
         return $this->response->setJSON($retorno);
     }
 
-     /**
+    /**
      * Função para fazer a chamada da exibição da view de criação dos grupos
      *
      * @param integer|null $id
@@ -206,7 +206,7 @@ class Grupos extends BaseController
         return $this->response->setJSON($retorno);
     }
 
-     /**
+    /**
      * De acordo com o metodo passado realiza a função de exibir a view de excluir o grupo ou realiza a propria exclusão do grupo.
      *
      * @param integer|null $id
@@ -289,13 +289,70 @@ class Grupos extends BaseController
         ];
 
         if (!empty($grupo->permissoes)) {
-            $permissoesExistentes = \array_column($grupo->permissoes, 'permissao_id'); 
-            $data['permissoesDisponiveis'] = $this->permissaoModel->whereNotIn('id', $permissoesExistentes)->findAll();//buscando as permissões que o usuário ainda não possui
-        }else{
+            $permissoesExistentes = \array_column($grupo->permissoes, 'permissao_id');
+            $data['permissoesDisponiveis'] = $this->permissaoModel->whereNotIn('id', $permissoesExistentes)->findAll(); //buscando as permissões que o usuário ainda não possui
+        } else {
             $data['permissoesDisponiveis'] = $this->permissaoModel->findAll();
         }
 
         return \view('Grupos/permissoes', $data);
+    }
+    
+    /**
+     * médoto responsavel por salvar as permissões
+     *
+     * @return void
+     */
+    public function salvarPermissoes()
+    {
+        //valida se e uma requisição via ajax
+        if (!$this->request->isAJAX()) {
+            return \redirect()->back();
+        }
+
+        //envio do hash do token do form.
+        $retorno['token'] = csrf_hash();
+
+        //pegando os dados da requisição.
+        $post = $this->request->getPost();
+        $grupo = $this->buscaGrupoOu404($post['id']);
+
+        if (empty($post['permissao_id'])) {
+            $retorno['erro'] = 'Por favor verifique os erros abaixo e tente novamente.';
+            $retorno['erros_model'] = ['permissao_id' => 'Escolha uma ou mais permissões para salvar.'];
+    
+            return $this->response->setJSON($retorno);
+        }
+
+        $permissaoPush = [];
+
+        foreach ($post['permissao_id'] as $permissao) {
+            array_push($permissaoPush, [
+                'grupo_id' => $grupo->id,
+                'permissao_id' => $permissao,
+            ]);
+        }
+
+        $this->grupoPermissaoModel->insertBatch($permissaoPush);
+        session()->setFlashdata('sucesso', 'Dados salvos com sucesso!');
+        return $this->response->setJSON($retorno);
+    }
+
+    /**
+     * médoto responsavel por excluir as permissões
+     *
+     * @return void
+     */
+    public function removePermissao(int $id = null)
+    {
+        if ($this->request->getMethod() === 'post') {
+
+            $this->grupoPermissaoModel->delete($id);
+            //retorno a baixo so funciona quando não e utilizado ajax request
+            return redirect()->back()->with('sucesso', 'Permissão removida com sucesso!');
+        }
+
+        return \redirect()->back();
     }
 
     /**
@@ -313,4 +370,3 @@ class Grupos extends BaseController
         return $grupo;
     }
 }
-?>
