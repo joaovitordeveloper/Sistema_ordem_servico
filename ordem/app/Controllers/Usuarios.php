@@ -4,16 +4,22 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Entities\Usuario;
+use App\Models\GrupoModel;
+use App\Models\GrupoUsuarioModel;
 use App\Models\UsuarioModel;
 
 class Usuarios extends BaseController
 {
 
     private $usuarioModel;
+    private $grupoUsuarioModel;
+    private $grupoModel;
 
     public function __construct()
     {
         $this->usuarioModel = new UsuarioModel();
+        $this->grupoUsuarioModel = new GrupoUsuarioModel();
+        $this->grupoModel = new GrupoModel();
     }
 
     /**
@@ -365,6 +371,34 @@ class Usuarios extends BaseController
         $this->usuarioModel->protect(false)->save($usuario);
 
         return redirect()->back()->with('sucesso', "Usuário $usuario->nome recuperado com sucesso!");
+    }
+
+    /**
+     * Método que fará a busca dos grupos de acesso do usuário.
+     *
+     * @param integer|null $id
+     * @return void
+     */
+    public function grupos(int $id = null)
+    {
+        $usuario = $this->buscaUsuarioOu404($id);
+        $usuario->grupos = $this->grupoUsuarioModel->recuperaGruposDoUsuario($usuario->id, 5);
+        $usuario->pager = $this->grupoUsuarioModel->pager;
+
+        $data = [
+            'titulo' => "Gerenciando os grupos de acesso do usuário " . esc($usuario->nome),
+            'usuario' => $usuario,
+        ];
+
+        if (!empty($usuario->grupos)) {
+            $gruposExistentes = \array_column($usuario->grupos, 'grupo_id');
+            $data['gruposDisponiveis'] = $this->grupoModel->where('id !=', 2)->whereNotIn('id', $gruposExistentes)->findAll();
+        
+        }else {
+            $data['gruposDisponiveis'] = $this->grupoModel->where('id !=', 2)->findAll();
+        }
+
+        return \view('Usuarios/grupos', $data);
     }
 
     /**
