@@ -390,6 +390,12 @@ class Usuarios extends BaseController
             'usuario' => $usuario,
         ];
 
+        //quando o usuário for um cliente irá retornar para a view do usuário informando que ele e um cliente 
+        if (in_array(2, array_column($usuario->grupos, 'grupo_id'))) {
+            return \redirect()->to(\site_url("usuarios/exibir/$usuario->id"))
+                              ->with('info', "Esse usário é um cliente, portanto, não é necessário atribuí-lo ou removê-lo de outros grupos de acesso");
+        }
+
         if (!empty($usuario->grupos)) {
             $gruposExistentes = \array_column($usuario->grupos, 'grupo_id');
             $data['gruposDisponiveis'] = $this->grupoModel->where('id !=', 2)->whereNotIn('id', $gruposExistentes)->findAll();
@@ -399,6 +405,48 @@ class Usuarios extends BaseController
         }
 
         return \view('Usuarios/grupos', $data);
+    }
+
+    /**
+     * função responsavel por salvar o grupo do usuário.
+     *
+     * @return void
+     */
+    public function salvarGrupos()
+    {
+         //envio do hash do token do form.
+         $retorno['token'] = csrf_hash();
+
+         //pegando os dados da requisição.
+         $post = $this->request->getPost();
+         $usuario = $this->buscaUsuarioOu404($post['id']);
+
+         if (empty($post['grupo_id'])) {
+            $retorno['erro'] = 'Por favor verifique os erros abaixo e tente novamente.';
+            $retorno['erros_model'] = ['grupo_id' => 'Escolha uma ou mais grupos para salvar.'];
+    
+            return $this->response->setJSON($retorno);
+        }
+
+        if (in_array(2, $post['grupo_id'])) {
+            $retorno['erro'] = 'Por favor verifique os erros abaixo e tente novamente.';
+            $retorno['erros_model'] = ['grupo_id' => 'O grupo de clientes não pode ser atribuido de forma manual.'];
+    
+            return $this->response->setJSON($retorno);
+        }
+
+        $gruposPush = [];
+
+        foreach ($post['grupo_id'] as $grupo) {
+            array_push($gruposPush, [
+                'grupo_id' => $grupo,
+                'usuario_id' => $usuario->id,
+            ]);
+        }
+        
+        $this->grupoUsuarioModel->insertBatch($gruposPush);
+        session()->setFlashdata('sucesso', 'Dados salvos com sucesso!');
+        return $this->response->setJSON($retorno);
     }
 
     /**
