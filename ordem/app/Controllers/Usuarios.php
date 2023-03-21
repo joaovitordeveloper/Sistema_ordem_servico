@@ -474,10 +474,32 @@ class Usuarios extends BaseController
     }
 
     /**
+     * Função responsavel por fazer a remoção de um grupo de acesso associado a um usuário.
+     *
+     * @return void
+     */
+    public function removeGrupo(int $id = null)
+    {
+        if ($this->request->getMethod() === 'post') {
+            $grupoUsuario = $this->buscaGrupoUsuarioOu404($id);
+            
+            if ($grupoUsuario->grupo_id == 2) {
+                return \redirect()->to(\site_url("usuarios/exibir/$grupoUsuario->usuario_id"))->with("info", "Não e permitida a exclusão do usuário do grupo de clientes");
+            }
+
+            $this->grupoUsuarioModel->delete($id);
+            //retorno a baixo so funciona quando não e utilizado ajax request
+            return redirect()->back()->with('sucesso', 'Usuário removido do grupo de acesso com sucesso!');
+        }
+
+        return \redirect()->back();
+    }
+
+    /**
      * Metodo que recupera o usuario.
      *
      * @param integer|null $id
-     * @return obeject
+     * @return Exception|obeject
      */
     private function buscaUsuarioOu404(int $id = null)
     {
@@ -487,6 +509,22 @@ class Usuarios extends BaseController
         }
 
         return $usuario;
+    }
+
+    /**
+     * Metodo que recupera o registro do grupo associado ao usuário.
+     *
+     * @param integer|null $id
+     * @return Exception|obeject
+     */
+    private function buscaGrupoUsuarioOu404(int $id = null)
+    {
+        //o metodo withDeleted busca todos os dados até mesmo os excluidos
+        if (!$id || !$grupoUsuario = $this->grupoUsuarioModel->find($id)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Não encontramos o registro de associação ao grupo de acesso $id");
+        }
+
+        return $grupoUsuario;
     }
 
     /**

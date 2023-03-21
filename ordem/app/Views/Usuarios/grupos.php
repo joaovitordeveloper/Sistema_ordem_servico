@@ -102,7 +102,7 @@
                                     <td>
                                         <?php 
                                             $atributos = [
-                                                'onSubmit' => "return confirm('Tem certeza que deseja excluir a permissão?');",
+                                                'onSubmit' => "return confirm('Tem certeza que deseja excluir o grupo de acesso?');",
                                             ]; 
                                         ?>
                                         <?php echo form_open("usuarios/removeGrupo/$info->grupo_usuario_id", $atributos); ?>
