@@ -52,6 +52,13 @@ class Autenticacao
         session()->destroy();
     }
 
+    public function pegaUsuarioLogado()
+    {
+        if ($this->usuario === null) {
+            $this->usuario = $this->pegaUsuarioDaSessao();
+        }
+    }
+
     /**
      * Método que insere na sessão o id do usuário.
      *
