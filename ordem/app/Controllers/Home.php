@@ -19,6 +19,5 @@ class Home extends BaseController
         $autenticacao = new Autenticacao();
         
         $autenticacao->login('teste2@teste.com','12345678');
-        dd($autenticacao->pegaUsuarioLogado());
     }
 }

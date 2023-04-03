@@ -28,7 +28,7 @@
 
                 <?php echo form_open('/', ['id' => 'form'], ['id' => "$grupo->id"]); ?>
 
-                <?php echo $this->include('grupos/_form');?>
+                <?php echo $this->include('Grupos/_form');?>
 
                 <div class="form-group mt-5 mb-2">
 

@@ -2,16 +2,19 @@
 
 namespace App\Libraries;
 
+use App\Models\GrupoUsuarioModel;
 use App\Models\UsuarioModel;
 
 class Autenticacao
 {
     private $usuario;
     private $usuarioModel;
+    private $grupoUsuarioModel;
 
     public function __construct()
     {
         $this->usuarioModel = new UsuarioModel();
+        $this->grupoUsuarioModel = new GrupoUsuarioModel();
     }
 
     /**
@@ -76,6 +79,8 @@ class Autenticacao
         return $this->pegaUsuarioLogado() !== null;
     }
 
+    //-------------------- Métodos Privados ------------------------//
+
     /**
      * Método que insere na sessão o id do usuário.
      *
@@ -107,5 +112,41 @@ class Autenticacao
         }
 
         return $usuario;
+    }
+
+    /**
+     * Verifica se o usuário logado faz parte do grupo admin
+     *
+     * @return boolean
+     */
+    private function isAdmin():bool
+    {
+        $grupoAdmin = 1;
+        $administrador = $this->grupoUsuarioModel->usuarioEstaNoGrupo($grupoAdmin, session()->get('usuario_id'));
+
+        if ($administrador == null) {
+            return false;
+        }
+
+        return true;
+
+    }
+
+    /**
+     * Verifica se o usuário logado faz parte do grupo clientes.
+     *
+     * @return boolean
+     */
+    private function isCliente():bool
+    {
+        $grupoCliente = 2;
+        $cliente = $this->grupoUsuarioModel->usuarioEstaNoGrupo($grupoCliente, session()->get('usuario_id'));
+
+        if ($cliente == null) {
+            return false;
+        }
+
+        return true;
+
     }
 }
