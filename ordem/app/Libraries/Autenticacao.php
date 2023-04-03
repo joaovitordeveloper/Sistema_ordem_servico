@@ -52,11 +52,28 @@ class Autenticacao
         session()->destroy();
     }
 
+    /**
+     * Pega o usuário que vai esta logado.
+     *
+     * @return void
+     */
     public function pegaUsuarioLogado()
     {
         if ($this->usuario === null) {
             $this->usuario = $this->pegaUsuarioDaSessao();
         }
+
+        return $this->usuario;
+    }
+
+    /**
+     * Metodo que verifica se o usuário esta logado
+     *
+     * @return boolean
+     */
+    public function estaLogado() :bool
+    {
+        return $this->pegaUsuarioLogado() !== null;
     }
 
     /**
