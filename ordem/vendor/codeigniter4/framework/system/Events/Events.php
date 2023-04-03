@@ -246,7 +246,7 @@ class Events
      *
      * @return string[]
      */
-    public static function getFiles()
+    public function getFiles()
     {
         return static::$files;
     }

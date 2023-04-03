@@ -19,7 +19,7 @@ use InvalidArgumentException;
 /**
  * A lightweight HTTP client for sending synchronous HTTP requests via cURL.
  */
-class CURLRequest extends OutgoingRequest
+class CURLRequest extends Request
 {
     /**
      * The response object associated with this request
@@ -96,6 +96,8 @@ class CURLRequest extends OutgoingRequest
      *  - baseURI
      *  - timeout
      *  - any other request options to use as defaults.
+     *
+     * @param ResponseInterface $response
      */
     public function __construct(App $config, URI $uri, ?ResponseInterface $response = null, array $options = [])
     {
@@ -103,7 +105,7 @@ class CURLRequest extends OutgoingRequest
             throw HTTPException::forMissingCurl(); // @codeCoverageIgnore
         }
 
-        parent::__construct('GET', $uri);
+        parent::__construct($config);
 
         $this->response       = $response;
         $this->baseURI        = $uri->useRawQueryString();
@@ -315,13 +317,7 @@ class CURLRequest extends OutgoingRequest
         $uri = $this->baseURI->resolveRelativeURI($url);
 
         // Create the string instead of casting to prevent baseURL muddling
-        return URI::createURIString(
-            $uri->getScheme(),
-            $uri->getAuthority(),
-            $uri->getPath(),
-            $uri->getQuery(),
-            $uri->getFragment()
-        );
+        return URI::createURIString($uri->getScheme(), $uri->getAuthority(), $uri->getPath(), $uri->getQuery(), $uri->getFragment());
     }
 
     /**
@@ -628,8 +624,6 @@ class CURLRequest extends OutgoingRequest
                 $curlOptions[CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_1_0;
             } elseif ($config['version'] === 1.1) {
                 $curlOptions[CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_1_1;
-            } elseif ($config['version'] === 2.0) {
-                $curlOptions[CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_2_0;
             }
         }
 

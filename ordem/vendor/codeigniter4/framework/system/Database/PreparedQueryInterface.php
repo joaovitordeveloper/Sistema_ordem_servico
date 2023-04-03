@@ -11,12 +11,8 @@
 
 namespace CodeIgniter\Database;
 
-use BadMethodCallException;
-
 /**
- * @template TConnection of object|resource
- * @template TStatement of object|resource
- * @template TResult of object|resource
+ * Prepared query interface
  */
 interface PreparedQueryInterface
 {
@@ -24,8 +20,7 @@ interface PreparedQueryInterface
      * Takes a new set of data and runs it against the currently
      * prepared query. Upon success, will return a Results object.
      *
-     * @return bool|ResultInterface
-     * @phpstan-return bool|ResultInterface<TConnection, TResult>
+     * @return ResultInterface
      */
     public function execute(...$data);
 
@@ -33,16 +28,14 @@ interface PreparedQueryInterface
      * Prepares the query against the database, and saves the connection
      * info necessary to execute the query later.
      *
-     * @return $this
+     * @return mixed
      */
     public function prepare(string $sql, array $options = []);
 
     /**
      * Explicity closes the statement.
-     *
-     * @throws BadMethodCallException
      */
-    public function close(): bool;
+    public function close();
 
     /**
      * Returns the SQL that has been prepared.

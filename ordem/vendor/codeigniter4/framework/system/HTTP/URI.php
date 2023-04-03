@@ -11,8 +11,8 @@
 
 namespace CodeIgniter\HTTP;
 
-use BadMethodCallException;
 use CodeIgniter\HTTP\Exceptions\HTTPException;
+use InvalidArgumentException;
 
 /**
  * Abstraction for a uniform resource identifier (URI).
@@ -35,11 +35,6 @@ class URI
      * @var string
      */
     protected $uriString;
-
-    /**
-     * The Current baseURL.
-     */
-    private ?string $baseURL = null;
 
     /**
      * List of URI segments.
@@ -87,11 +82,6 @@ class URI
 
     /**
      * URI path.
-     *
-     * Note: The constructor of the IncomingRequest class changes the path of
-     *      the URI object held by the IncomingRequest class to a path relative
-     *      to the baseURL. If the baseURL contains subfolders, this value
-     *      will be different from the current URI path.
      *
      * @var string
      */
@@ -148,17 +138,14 @@ class URI
     /**
      * Builds a representation of the string from the component parts.
      *
-     * @param string|null $scheme URI scheme. E.g., http, ftp
-     *
-     * @return string URI string with only passed parts. Maybe incomplete as a URI.
+     * @param string|null $scheme    URI scheme. E.g., http, ftp
+     * @param string      $authority
+     * @param string      $path
+     * @param string      $query
+     * @param string      $fragment
      */
-    public static function createURIString(
-        ?string $scheme = null,
-        ?string $authority = null,
-        ?string $path = null,
-        ?string $query = null,
-        ?string $fragment = null
-    ): string {
+    public static function createURIString(?string $scheme = null, ?string $authority = null, ?string $path = null, ?string $query = null, ?string $fragment = null): string
+    {
         $uri = '';
         if (! empty($scheme)) {
             $uri .= $scheme . '://';
@@ -169,9 +156,7 @@ class URI
         }
 
         if (isset($path) && $path !== '') {
-            $uri .= substr($uri, -1, 1) !== '/'
-                ? '/' . ltrim($path, '/')
-                : ltrim($path, '/');
+            $uri .= substr($uri, -1, 1) !== '/' ? '/' . ltrim($path, '/') : ltrim($path, '/');
         }
 
         if ($query) {
@@ -240,12 +225,9 @@ class URI
     /**
      * Constructor.
      *
-     * @param string|null $uri The URI to parse.
+     * @param string $uri
      *
-     * @throws HTTPException
-     *
-     * @TODO null for param $uri should be removed.
-     *      See https://www.php-fig.org/psr/psr-17/#26-urifactoryinterface
+     * @throws InvalidArgumentException
      */
     public function __construct(?string $uri = null)
     {
@@ -284,8 +266,6 @@ class URI
      * Sets and overwrites any current URI information.
      *
      * @return URI
-     *
-     * @throws HTTPException
      */
     public function setURI(?string $uri = null)
     {
@@ -758,30 +738,6 @@ class URI
     }
 
     /**
-     * Sets the current baseURL.
-     *
-     * @interal
-     */
-    public function setBaseURL(string $baseURL): void
-    {
-        $this->baseURL = $baseURL;
-    }
-
-    /**
-     * Returns the current baseURL.
-     *
-     * @interal
-     */
-    public function getBaseURL(): string
-    {
-        if ($this->baseURL === null) {
-            throw new BadMethodCallException('The $baseURL is not set.');
-        }
-
-        return $this->baseURL;
-    }
-
-    /**
      * Sets the path portion of the URI based on segments.
      *
      * @return $this
@@ -1087,11 +1043,13 @@ class URI
         ), $query);
 
         $params = implode('&', $params);
-        parse_str($params, $result);
+        parse_str($params, $params);
 
-        foreach ($result as $key => $value) {
+        foreach ($params as $key => $value) {
             $return[hex2bin($key)] = $value;
         }
+
+        $query = $params = null;
 
         return $return;
     }

@@ -18,14 +18,16 @@ namespace CodeIgniter\Exceptions;
  *
  * @codeCoverageIgnore
  */
-class CastException extends CriticalError implements HasExitCodeInterface
+class CastException extends CriticalError
 {
     use DebugTraceableTrait;
 
-    public function getExitCode(): int
-    {
-        return EXIT_CONFIG;
-    }
+    /**
+     * Exit status code
+     *
+     * @var int
+     */
+    protected $code = EXIT_CONFIG;
 
     public static function forInvalidJsonFormatException(int $error)
     {

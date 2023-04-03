@@ -252,9 +252,7 @@ class Language
         }
 
         if (isset($strings[1])) {
-            $string = array_shift($strings);
-
-            $strings = array_replace_recursive($string, ...$strings);
+            $strings = array_replace_recursive(...$strings);
         } elseif (isset($strings[0])) {
             $strings = $strings[0];
         }

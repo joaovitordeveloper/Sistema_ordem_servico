@@ -26,16 +26,16 @@ interface CacheInterface
      *
      * @param string $key Cache item name
      *
-     * @return array|bool|float|int|object|string|null
+     * @return mixed
      */
     public function get(string $key);
 
     /**
      * Saves an item to the cache store.
      *
-     * @param string                                  $key   Cache item name
-     * @param array|bool|float|int|object|string|null $value The data to save
-     * @param int                                     $ttl   Time To Live, in seconds (default 60)
+     * @param string $key   Cache item name
+     * @param mixed  $value The data to save
+     * @param int    $ttl   Time To Live, in seconds (default 60)
      *
      * @return bool Success or failure
      */
@@ -56,7 +56,7 @@ interface CacheInterface
      * @param string $key    Cache ID
      * @param int    $offset Step/value to increase by
      *
-     * @return bool|int
+     * @return mixed
      */
     public function increment(string $key, int $offset = 1);
 
@@ -66,7 +66,7 @@ interface CacheInterface
      * @param string $key    Cache ID
      * @param int    $offset Step/value to increase by
      *
-     * @return bool|int
+     * @return mixed
      */
     public function decrement(string $key, int $offset = 1);
 
@@ -83,7 +83,7 @@ interface CacheInterface
      * The information returned and the structure of the data
      * varies depending on the handler.
      *
-     * @return array|false|object|null
+     * @return mixed
      */
     public function getCacheInfo();
 

@@ -102,7 +102,12 @@ trait FilterTestTrait
         $this->filters ??= new Filters($this->filtersConfig, $this->request, $this->response);
 
         if ($this->collection === null) {
-            $this->collection = Services::routes()->loadRoutes();
+            // Load the RouteCollection from Config to gather App route info
+            // (creates $routes using the Service as a starting point)
+            require APPPATH . 'Config/Routes.php';
+
+            $routes->getRoutes('*'); // Triggers discovery
+            $this->collection = $routes;
         }
 
         $this->doneFilterSetUp = true;

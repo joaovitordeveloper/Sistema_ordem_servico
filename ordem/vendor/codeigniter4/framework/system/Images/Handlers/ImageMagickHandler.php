@@ -322,10 +322,7 @@ class ImageMagickHandler extends BaseHandler
      */
     protected function _text(string $text, array $options = [])
     {
-        $xAxis   = 0;
-        $yAxis   = 0;
-        $gravity = '';
-        $cmd     = '';
+        $cmd = '';
 
         // Reverse the vertical offset
         // When the image is positioned at the bottom

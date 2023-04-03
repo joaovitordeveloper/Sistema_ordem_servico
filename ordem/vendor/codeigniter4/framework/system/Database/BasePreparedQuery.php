@@ -11,26 +11,18 @@
 
 namespace CodeIgniter\Database;
 
-use ArgumentCountError;
 use BadMethodCallException;
-use CodeIgniter\Database\Exceptions\DatabaseException;
 use CodeIgniter\Events\Events;
-use ErrorException;
 
 /**
- * @template TConnection of object|resource
- * @template TStatement of object|resource
- * @template TResult of object|resource
- *
- * @implements PreparedQueryInterface<TConnection, TStatement, TResult>
+ * Base prepared query
  */
 abstract class BasePreparedQuery implements PreparedQueryInterface
 {
     /**
      * The prepared statement itself.
      *
-     * @var object|resource|null
-     * @phpstan-var TStatement|null
+     * @var object|resource
      */
     protected $statement;
 
@@ -60,7 +52,6 @@ abstract class BasePreparedQuery implements PreparedQueryInterface
      * A reference to the db connection to use.
      *
      * @var BaseConnection
-     * @phpstan-var BaseConnection<TConnection, TResult>
      */
     protected $db;
 
@@ -76,7 +67,7 @@ abstract class BasePreparedQuery implements PreparedQueryInterface
      * NOTE: This version is based on SQL code. Child classes should
      * override this method.
      *
-     * @return $this
+     * @return mixed
      */
     public function prepare(string $sql, array $options = [], string $queryClass = Query::class)
     {
@@ -102,7 +93,7 @@ abstract class BasePreparedQuery implements PreparedQueryInterface
     /**
      * The database-dependent portion of the prepare statement.
      *
-     * @return $this
+     * @return mixed
      */
     abstract public function _prepare(string $sql, array $options = []);
 
@@ -110,74 +101,23 @@ abstract class BasePreparedQuery implements PreparedQueryInterface
      * Takes a new set of data and runs it against the currently
      * prepared query. Upon success, will return a Results object.
      *
-     * @return bool|ResultInterface
-     * @phpstan-return bool|ResultInterface<TConnection, TResult>
-     *
-     * @throws DatabaseException
+     * @return ResultInterface
      */
     public function execute(...$data)
     {
         // Execute the Query.
         $startTime = microtime(true);
 
-        try {
-            $exception = null;
-            $result    = $this->_execute($data);
-        } catch (ArgumentCountError|ErrorException $exception) {
-            $result = false;
-        }
+        $this->_execute($data);
 
         // Update our query object
         $query = clone $this->query;
         $query->setBinds($data);
 
-        if ($result === false) {
-            $query->setDuration($startTime, $startTime);
-
-            // This will trigger a rollback if transactions are being used
-            if ($this->db->transDepth !== 0) {
-                $this->db->transStatus = false;
-            }
-
-            if ($this->db->DBDebug) {
-                // We call this function in order to roll-back queries
-                // if transactions are enabled. If we don't call this here
-                // the error message will trigger an exit, causing the
-                // transactions to remain in limbo.
-                while ($this->db->transDepth !== 0) {
-                    $transDepth = $this->db->transDepth;
-                    $this->db->transComplete();
-
-                    if ($transDepth === $this->db->transDepth) {
-                        log_message('error', 'Database: Failure during an automated transaction commit/rollback!');
-                        break;
-                    }
-                }
-
-                // Let others do something with this query.
-                Events::trigger('DBQuery', $query);
-
-                if ($exception !== null) {
-                    throw new DatabaseException($exception->getMessage(), $exception->getCode(), $exception);
-                }
-
-                return false;
-            }
-
-            // Let others do something with this query.
-            Events::trigger('DBQuery', $query);
-
-            return false;
-        }
-
         $query->setDuration($startTime);
 
         // Let others do something with this query
         Events::trigger('DBQuery', $query);
-
-        if ($this->db->isWriteType($query)) {
-            return true;
-        }
 
         // Return a result object
         $resultClass = str_replace('PreparedQuery', 'Result', static::class);
@@ -195,32 +135,21 @@ abstract class BasePreparedQuery implements PreparedQueryInterface
     /**
      * Returns the result object for the prepared query.
      *
-     * @return object|resource|null
+     * @return mixed
      */
     abstract public function _getResult();
 
     /**
-     * Explicitly closes the prepared statement.
-     *
-     * @throws BadMethodCallException
+     * Explicitly closes the statement.
      */
-    public function close(): bool
+    public function close()
     {
-        if (! isset($this->statement)) {
-            throw new BadMethodCallException('Cannot call close on a non-existing prepared statement.');
+        if (! is_object($this->statement) || ! method_exists($this->statement, 'close')) {
+            return;
         }
 
-        try {
-            return $this->_close();
-        } finally {
-            $this->statement = null;
-        }
+        $this->statement->close();
     }
-
-    /**
-     * The database-dependent version of the close method.
-     */
-    abstract protected function _close(): bool;
 
     /**
      * Returns the SQL that has been prepared.

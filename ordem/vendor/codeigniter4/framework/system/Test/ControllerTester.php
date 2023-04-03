@@ -13,7 +13,7 @@ namespace CodeIgniter\Test;
 
 use CodeIgniter\Controller;
 use CodeIgniter\HTTP\IncomingRequest;
-use CodeIgniter\HTTP\ResponseInterface;
+use CodeIgniter\HTTP\Response;
 use CodeIgniter\HTTP\URI;
 use Config\App;
 use Config\Services;
@@ -58,7 +58,7 @@ trait ControllerTester
     /**
      * Response.
      *
-     * @var ResponseInterface
+     * @var Response
      */
     protected $response;
 
@@ -182,7 +182,7 @@ trait ControllerTester
             $output = ob_get_clean();
 
             // If the controller returned a response, use it
-            if (isset($response) && $response instanceof ResponseInterface) {
+            if (isset($response) && $response instanceof Response) {
                 $result->setResponse($response);
             }
 

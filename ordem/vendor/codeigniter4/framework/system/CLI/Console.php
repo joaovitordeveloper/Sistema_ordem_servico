@@ -12,7 +12,6 @@
 namespace CodeIgniter\CLI;
 
 use CodeIgniter\CodeIgniter;
-use Config\Services;
 use Exception;
 
 /**
@@ -21,20 +20,32 @@ use Exception;
 class Console
 {
     /**
+     * Main CodeIgniter instance.
+     *
+     * @var CodeIgniter
+     */
+    protected $app;
+
+    public function __construct(CodeIgniter $app)
+    {
+        $this->app = $app;
+    }
+
+    /**
      * Runs the current command discovered on the CLI.
      *
-     * @return int|void
+     * @return mixed
      *
      * @throws Exception
      */
-    public function run()
+    public function run(bool $useSafeOutput = false)
     {
-        $runner  = Services::commands();
-        $params  = array_merge(CLI::getSegments(), CLI::getOptions());
-        $params  = $this->parseParamsForHelpOption($params);
-        $command = array_shift($params) ?? 'list';
+        $path = CLI::getURI() ?: 'list';
 
-        return $runner->run($command, $params);
+        // Set the path for the application to route to.
+        $this->app->setPath("ci{$path}");
+
+        return $this->app->useSafeOutput($useSafeOutput)->run();
     }
 
     /**
@@ -46,32 +57,7 @@ class Console
             return;
         }
 
-        CLI::write(sprintf(
-            'CodeIgniter v%s Command Line Tool - Server Time: %s UTC%s',
-            CodeIgniter::CI_VERSION,
-            date('Y-m-d H:i:s'),
-            date('P')
-        ), 'green');
+        CLI::write(sprintf('CodeIgniter v%s Command Line Tool - Server Time: %s UTC%s', CodeIgniter::CI_VERSION, date('Y-m-d H:i:s'), date('P')), 'green');
         CLI::newLine();
-    }
-
-    /**
-     * Introspects the `$params` passed for presence of the
-     * `--help` option.
-     *
-     * If present, it will be found as `['help' => null]`.
-     * We'll remove that as an option from `$params` and
-     * unshift it as argument instead.
-     */
-    private function parseParamsForHelpOption(array $params): array
-    {
-        if (array_key_exists('help', $params)) {
-            unset($params['help']);
-
-            $params = $params === [] ? ['list'] : $params;
-            array_unshift($params, 'help');
-        }
-
-        return $params;
     }
 }

@@ -16,8 +16,6 @@ use CodeIgniter\Entity\Entity;
 
 /**
  * Result for OCI8
- *
- * @extends BaseResult<resource, resource>
  */
 class Result extends BaseResult
 {

@@ -97,8 +97,6 @@ abstract class BaseCommand
      * Actually execute a command.
      *
      * @param array<int|string, string|null> $params
-     *
-     * @return int|void
      */
     abstract public function run(array $params);
 

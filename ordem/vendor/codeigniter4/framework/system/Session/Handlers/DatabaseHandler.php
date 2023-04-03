@@ -16,7 +16,6 @@ use CodeIgniter\Database\BaseConnection;
 use CodeIgniter\Session\Exceptions\SessionException;
 use Config\App as AppConfig;
 use Config\Database;
-use Config\Session as SessionConfig;
 use ReturnTypeWillChange;
 
 /**
@@ -73,28 +72,20 @@ class DatabaseHandler extends BaseHandler
     {
         parent::__construct($config, $ipAddress);
 
-        /** @var SessionConfig|null $session */
-        $session = config('Session');
+        $this->table = $config->sessionSavePath;
 
-        // Store Session configurations
-        if ($session instanceof SessionConfig) {
-            $this->DBGroup = $session->DBGroup ?? config(Database::class)->defaultGroup;
-            // Add sessionCookieName for multiple session cookies.
-            $this->idPrefix = $session->cookieName . ':';
-        } else {
-            // `Config/Session.php` is absence
-            $this->DBGroup = $config->sessionDBGroup ?? config(Database::class)->defaultGroup;
-            // Add sessionCookieName for multiple session cookies.
-            $this->idPrefix = $config->sessionCookieName . ':';
-        }
-
-        $this->table = $this->savePath;
         if (empty($this->table)) {
             throw SessionException::forMissingDatabaseTable();
         }
 
-        $this->db       = Database::connect($this->DBGroup);
+        $this->DBGroup = $config->sessionDBGroup ?? config(Database::class)->defaultGroup;
+
+        $this->db = Database::connect($this->DBGroup);
+
         $this->platform = $this->db->getPlatform();
+
+        // Add sessionCookieName for multiple session cookies.
+        $this->idPrefix = $config->sessionCookieName . ':';
     }
 
     /**

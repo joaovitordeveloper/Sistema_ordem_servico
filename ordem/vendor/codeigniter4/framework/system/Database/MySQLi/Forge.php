@@ -183,78 +183,55 @@ class Forge extends BaseForge
     }
 
     /**
-     * Generates SQL to add indexes
+     * Process indexes
      *
-     * @param bool $asQuery When true returns stand alone SQL, else partial SQL used with CREATE TABLE
+     * @param string $table (ignored)
      */
-    protected function _processIndexes(string $table, bool $asQuery = false): array
+    protected function _processIndexes(string $table): string
     {
-        $sqls  = [''];
-        $index = 0;
+        $sql = '';
 
         for ($i = 0, $c = count($this->keys); $i < $c; $i++) {
-            $index = $i;
-            if ($asQuery === false) {
-                $index = 0;
-            }
-
-            if (isset($this->keys[$i]['fields'])) {
-                for ($i2 = 0, $c2 = count($this->keys[$i]['fields']); $i2 < $c2; $i2++) {
-                    if (! isset($this->fields[$this->keys[$i]['fields'][$i2]])) {
-                        unset($this->keys[$i]['fields'][$i2]);
+            if (is_array($this->keys[$i])) {
+                for ($i2 = 0, $c2 = count($this->keys[$i]); $i2 < $c2; $i2++) {
+                    if (! isset($this->fields[$this->keys[$i][$i2]])) {
+                        unset($this->keys[$i][$i2]);
 
                         continue;
                     }
                 }
+            } elseif (! isset($this->fields[$this->keys[$i]])) {
+                unset($this->keys[$i]);
+
+                continue;
             }
 
-            if (! is_array($this->keys[$i]['fields'])) {
-                $this->keys[$i]['fields'] = [$this->keys[$i]['fields']];
+            if (! is_array($this->keys[$i])) {
+                $this->keys[$i] = [$this->keys[$i]];
             }
 
             $unique = in_array($i, $this->uniqueKeys, true) ? 'UNIQUE ' : '';
 
-            $keyName = $this->db->escapeIdentifiers(($this->keys[$i]['keyName'] === '') ?
-                implode('_', $this->keys[$i]['fields']) :
-                $this->keys[$i]['keyName']);
-
-            if ($asQuery === true) {
-                $sqls[$index] = 'ALTER TABLE ' . $this->db->escapeIdentifiers($table) . " ADD {$unique}KEY "
-                    . $keyName
-                    . ' (' . implode(', ', $this->db->escapeIdentifiers($this->keys[$i]['fields'])) . ')';
-            } else {
-                $sqls[$index] .= ",\n\t{$unique}KEY " . $keyName
-                . ' (' . implode(', ', $this->db->escapeIdentifiers($this->keys[$i]['fields'])) . ')';
-            }
+            $sql .= ",\n\t{$unique}KEY " . $this->db->escapeIdentifiers(implode('_', $this->keys[$i]))
+                . ' (' . implode(', ', $this->db->escapeIdentifiers($this->keys[$i])) . ')';
         }
 
         $this->keys = [];
 
-        return $sqls;
+        return $sql;
     }
 
     /**
      * Drop Key
+     *
+     * @return bool
      */
-    public function dropKey(string $table, string $keyName, bool $prefixKeyName = true): bool
+    public function dropKey(string $table, string $keyName)
     {
         $sql = sprintf(
             $this->dropIndexStr,
             $this->db->escapeIdentifiers($keyName),
             $this->db->escapeIdentifiers($this->db->DBPrefix . $table),
-        );
-
-        return $this->db->query($sql);
-    }
-
-    /**
-     * Drop Primary Key
-     */
-    public function dropPrimaryKey(string $table, string $keyName = ''): bool
-    {
-        $sql = sprintf(
-            'ALTER TABLE %s DROP PRIMARY KEY',
-            $this->db->escapeIdentifiers($this->db->DBPrefix . $table)
         );
 
         return $this->db->query($sql);

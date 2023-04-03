@@ -67,7 +67,7 @@ class MigrationRunner
      *
      * @var string
      */
-    protected $regex = '/\A(\d{4}[_-]?\d{2}[_-]?\d{2}[_-]?\d{6})_(\w+)\z/';
+    protected $regex = '/^\d{4}[_-]?\d{2}[_-]?\d{2}[_-]?\d{6}_(\w+)$/';
 
     /**
      * The main database connection. Used to store
@@ -448,8 +448,6 @@ class MigrationRunner
     /**
      * Create a migration object from a file path.
      *
-     * @param string $path Full path to a valid migration file.
-     *
      * @return false|object Returns the migration object, or false on failure
      */
     protected function migrationFromFile(string $path, string $namespace)
@@ -458,9 +456,9 @@ class MigrationRunner
             return false;
         }
 
-        $filename = basename($path, '.php');
+        $name = basename($path, '.php');
 
-        if (! preg_match($this->regex, $filename)) {
+        if (! preg_match($this->regex, $name)) {
             return false;
         }
 
@@ -468,8 +466,8 @@ class MigrationRunner
 
         $migration = new stdClass();
 
-        $migration->version   = $this->getMigrationNumber($filename);
-        $migration->name      = $this->getMigrationName($filename);
+        $migration->version   = $this->getMigrationNumber($name);
+        $migration->name      = $this->getMigrationName($name);
         $migration->path      = $path;
         $migration->class     = $locator->getClassname($path);
         $migration->namespace = $namespace;
@@ -527,29 +525,23 @@ class MigrationRunner
 
     /**
      * Extracts the migration number from a filename
-     *
-     * @param string $migration A migration filename w/o path.
      */
     protected function getMigrationNumber(string $migration): string
     {
-        preg_match($this->regex, $migration, $matches);
+        preg_match('/^\d{4}[_-]?\d{2}[_-]?\d{2}[_-]?\d{6}/', $migration, $matches);
 
-        return count($matches) ? $matches[1] : '0';
+        return count($matches) ? $matches[0] : '0';
     }
 
     /**
-     * Extracts the migration name from a filename
-     *
-     * Note: The migration name should be the classname, but maybe they are
-     *       different.
-     *
-     * @param string $migration A migration filename w/o path.
+     * Extracts the migration class name from a filename
      */
     protected function getMigrationName(string $migration): string
     {
-        preg_match($this->regex, $migration, $matches);
+        $parts = explode('_', $migration);
+        array_shift($parts);
 
-        return count($matches) ? $matches[2] : '';
+        return implode('_', $parts);
     }
 
     /**

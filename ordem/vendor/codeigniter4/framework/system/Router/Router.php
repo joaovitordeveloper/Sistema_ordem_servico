@@ -155,10 +155,6 @@ class Router implements RouterInterface
     }
 
     /**
-     * Finds the controller method corresponding to the URI.
-     *
-     * @param string|null $uri URI path relative to baseURL
-     *
      * @return Closure|string Controller classname or Closure
      *
      * @throws PageNotFoundException
@@ -166,9 +162,12 @@ class Router implements RouterInterface
      */
     public function handle(?string $uri = null)
     {
-        // If we cannot find a URI to match against, then set it to root (`/`).
+        // If we cannot find a URI to match against, then
+        // everything runs off of its default settings.
         if ($uri === null || $uri === '') {
-            $uri = '/';
+            return strpos($this->controller, '\\') === false
+                ? $this->collection->getDefaultNamespace() . $this->controller
+                : $this->controller;
         }
 
         // Decode URL-encoded string
@@ -325,7 +324,7 @@ class Router implements RouterInterface
 
     /**
      * Sets the value that should be used to match the index.php file. Defaults
-     * to index.php but this allows you to modify it in case you are using
+     * to index.php but this allows you to modify it in case your are using
      * something like mod_rewrite to remove the page. This allows you to set
      * it a blank.
      *
@@ -377,7 +376,7 @@ class Router implements RouterInterface
     }
 
     /**
-     * Checks Defined Routes.
+     * Checks Defined Routs.
      *
      * Compares the uri string against the routes that the
      * RouteCollection class defined for us, attempting to find a match.
@@ -440,13 +439,6 @@ class Router implements RouterInterface
                         $matched
                     );
 
-                    if ($this->collection->shouldUseSupportedLocalesOnly()
-                        && ! in_array($matched['locale'], config('App')->supportedLocales, true)) {
-                        // Throw exception to prevent the autorouter, if enabled,
-                        // from trying to find a route
-                        throw PageNotFoundException::forLocaleNotSupported($matched['locale']);
-                    }
-
                     $this->detectedLocale = $matched['locale'];
                     unset($matched);
                 }
@@ -496,7 +488,7 @@ class Router implements RouterInterface
     }
 
     /**
-     * Checks Auto Routes.
+     * Checks Auto Routs.
      *
      * Attempts to match a URI path against Controllers and directories
      * found in APPPATH/Controllers, to find a matching route.
@@ -582,6 +574,8 @@ class Router implements RouterInterface
     {
         if (empty($dir)) {
             $this->directory = null;
+
+            return;
         }
 
         if ($this->autoRouter instanceof AutoRouter) {

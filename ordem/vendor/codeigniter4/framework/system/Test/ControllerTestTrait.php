@@ -14,7 +14,7 @@ namespace CodeIgniter\Test;
 use CodeIgniter\Controller;
 use CodeIgniter\HTTP\Exceptions\HTTPException;
 use CodeIgniter\HTTP\IncomingRequest;
-use CodeIgniter\HTTP\ResponseInterface;
+use CodeIgniter\HTTP\Response;
 use CodeIgniter\HTTP\URI;
 use Config\App;
 use Config\Services;
@@ -55,7 +55,7 @@ trait ControllerTestTrait
     /**
      * Response.
      *
-     * @var ResponseInterface
+     * @var Response
      */
     protected $response;
 
@@ -178,7 +178,7 @@ trait ControllerTestTrait
         }
 
         // If the controller did not return a response then start one
-        if (! $response instanceof ResponseInterface) {
+        if (! $response instanceof Response) {
             $response = $this->response;
         }
 
@@ -245,7 +245,7 @@ trait ControllerTestTrait
     /**
      * Set controller's response, with method chaining.
      *
-     * @param ResponseInterface $response
+     * @param mixed $response
      *
      * @return $this
      */

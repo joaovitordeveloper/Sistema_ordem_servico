@@ -16,9 +16,6 @@ use CodeIgniter\Database\BaseConnection;
 use CodeIgniter\Database\BaseResult;
 use CodeIgniter\Database\Query;
 
-/**
- * @extends BaseConnection<object|resource, object|resource>
- */
 class MockConnection extends BaseConnection
 {
     protected $returnValues = [];

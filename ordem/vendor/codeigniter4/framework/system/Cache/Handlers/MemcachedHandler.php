@@ -124,8 +124,7 @@ class MemcachedHandler extends BaseHandler
      */
     public function get(string $key)
     {
-        $data = [];
-        $key  = static::validateKey($key, $this->prefix);
+        $key = static::validateKey($key, $this->prefix);
 
         if ($this->memcached instanceof Memcached) {
             $data = $this->memcached->get($key);

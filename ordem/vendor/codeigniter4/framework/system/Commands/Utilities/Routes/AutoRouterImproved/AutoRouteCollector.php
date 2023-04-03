@@ -85,7 +85,6 @@ final class AutoRouteCollector
                 $tbody[] = [
                     strtoupper($item['method']) . '(auto)',
                     $item['route'] . $item['route_params'],
-                    '',
                     $item['handler'],
                     $item['before'],
                     $item['after'],

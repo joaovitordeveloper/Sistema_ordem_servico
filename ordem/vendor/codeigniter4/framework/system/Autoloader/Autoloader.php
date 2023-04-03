@@ -11,13 +11,10 @@
 
 namespace CodeIgniter\Autoloader;
 
-use CodeIgniter\Exceptions\ConfigException;
 use Composer\Autoload\ClassLoader;
-use Composer\InstalledVersions;
 use Config\Autoload;
 use Config\Modules;
 use InvalidArgumentException;
-use RuntimeException;
 
 /**
  * An autoloader that uses both PSR4 autoloading, and traditional classmaps.
@@ -73,19 +70,9 @@ class Autoloader
     /**
      * Stores files as a list.
      *
-     * @var string[]
-     * @phpstan-var list<string>
+     * @var array<int, string>
      */
     protected $files = [];
-
-    /**
-     * Stores helper list.
-     * Always load the URL helper, it should be used in most apps.
-     *
-     * @var string[]
-     * @phpstan-var list<string>
-     */
-    protected $helpers = ['url'];
 
     /**
      * Reads in the configuration array (described above) and stores
@@ -117,10 +104,6 @@ class Autoloader
             $this->files = $config->files;
         }
 
-        if (isset($config->helpers)) { // @phpstan-ignore-line
-            $this->helpers = [...$this->helpers, ...$config->helpers];
-        }
-
         if (is_file(COMPOSER_PATH)) {
             $this->loadComposerInfo($modules);
         }
@@ -139,8 +122,7 @@ class Autoloader
 
         // Should we load through Composer's namespaces, also?
         if ($modules->discoverInComposer) {
-            // @phpstan-ignore-next-line
-            $this->loadComposerNamespaces($composer, $modules->composerPackages ?? []);
+            $this->loadComposerNamespaces($composer);
         }
 
         unset($composer);
@@ -161,17 +143,6 @@ class Autoloader
         foreach ($this->files as $file) {
             $this->includeFile($file);
         }
-    }
-
-    /**
-     * Unregister autoloader.
-     *
-     * This method is for testing.
-     */
-    public function unregister(): void
-    {
-        spl_autoload_unregister([$this, 'loadClass']);
-        spl_autoload_unregister([$this, 'loadClassmap']);
     }
 
     /**
@@ -318,9 +289,9 @@ class Autoloader
     }
 
     /**
-     * Check file path.
+     * Sanitizes a filename, replacing spaces with dashes.
      *
-     * Checks special characters that are illegal in filenames on certain
+     * Removes special characters that are illegal in filenames on certain
      * operating systems and special characters requiring special escaping
      * to manipulate at the command line. Replaces spaces and consecutive
      * dashes with a single dash. Trim period, dash and underscore from beginning
@@ -334,101 +305,26 @@ class Autoloader
         // Plus the forward slash for directory separators since this might be a path.
         // http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_278
         // Modified to allow backslash and colons for on Windows machines.
-        $result = preg_match_all('/[^0-9\p{L}\s\/\-_.:\\\\]/u', $filename, $matches);
-
-        if ($result > 0) {
-            $chars = implode('', $matches[0]);
-
-            throw new InvalidArgumentException(
-                'The file path contains special characters "' . $chars
-                . '" that are not allowed: "' . $filename . '"'
-            );
-        }
-        if ($result === false) {
-            if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
-                $message = preg_last_error_msg();
-            } else {
-                $message = 'Regex error. error code: ' . preg_last_error();
-            }
-
-            throw new RuntimeException($message . '. filename: "' . $filename . '"');
-        }
+        $filename = preg_replace('/[^0-9\p{L}\s\/\-\_\.\:\\\\]/u', '', $filename);
 
         // Clean up our filename edges.
-        $cleanFilename = trim($filename, '.-_');
-
-        if ($filename !== $cleanFilename) {
-            throw new InvalidArgumentException('The characters ".-_" are not allowed in filename edges: "' . $filename . '"');
-        }
-
-        return $cleanFilename;
+        return trim($filename, '.-_');
     }
 
-    private function loadComposerNamespaces(ClassLoader $composer, array $composerPackages): void
+    private function loadComposerNamespaces(ClassLoader $composer): void
     {
-        $namespacePaths = $composer->getPrefixesPsr4();
+        $paths = $composer->getPrefixesPsr4();
 
         // Get rid of CodeIgniter so we don't have duplicates
-        if (isset($namespacePaths['CodeIgniter\\'])) {
-            unset($namespacePaths['CodeIgniter\\']);
-        }
-
-        if (! method_exists(InstalledVersions::class, 'getAllRawData')) {
-            throw new RuntimeException(
-                'Your Composer version is too old.'
-                . ' Please update Composer (run `composer self-update`) to v2.0.14 or later'
-                . ' and remove your vendor/ directory, and run `composer update`.'
-            );
-        }
-        // This method requires Composer 2.0.14 or later.
-        $allData     = InstalledVersions::getAllRawData();
-        $packageList = [];
-
-        foreach ($allData as $list) {
-            $packageList = array_merge($packageList, $list['versions']);
-        }
-
-        // Check config for $composerPackages.
-        $only    = $composerPackages['only'] ?? [];
-        $exclude = $composerPackages['exclude'] ?? [];
-        if ($only !== [] && $exclude !== []) {
-            throw new ConfigException('Cannot use "only" and "exclude" at the same time in "Config\Modules::$composerPackages".');
-        }
-
-        // Get install paths of packages to add namespace for auto-discovery.
-        $installPaths = [];
-        if ($only !== []) {
-            foreach ($packageList as $packageName => $data) {
-                if (in_array($packageName, $only, true) && isset($data['install_path'])) {
-                    $installPaths[] = $data['install_path'];
-                }
-            }
-        } else {
-            foreach ($packageList as $packageName => $data) {
-                if (! in_array($packageName, $exclude, true) && isset($data['install_path'])) {
-                    $installPaths[] = $data['install_path'];
-                }
-            }
+        if (isset($paths['CodeIgniter\\'])) {
+            unset($paths['CodeIgniter\\']);
         }
 
         $newPaths = [];
 
-        foreach ($namespacePaths as $namespace => $srcPaths) {
-            $add = false;
-
-            foreach ($srcPaths as $path) {
-                foreach ($installPaths as $installPath) {
-                    if ($installPath === substr($path, 0, strlen($installPath))) {
-                        $add = true;
-                        break 2;
-                    }
-                }
-            }
-
-            if ($add) {
-                // Composer stores namespaces with trailing slash. We don't.
-                $newPaths[rtrim($namespace, '\\ ')] = $srcPaths;
-            }
+        foreach ($paths as $key => $value) {
+            // Composer stores namespaces with trailing slash. We don't.
+            $newPaths[rtrim($key, '\\ ')] = $value;
         }
 
         $this->addNamespace($newPaths);
@@ -475,13 +371,5 @@ class Autoloader
 
         $this->prefixes = array_merge($this->prefixes, $newPaths);
         $this->classmap = array_merge($this->classmap, $classes);
-    }
-
-    /**
-     * Loads helpers
-     */
-    public function loadHelpers(): void
-    {
-        helper($this->helpers);
     }
 }

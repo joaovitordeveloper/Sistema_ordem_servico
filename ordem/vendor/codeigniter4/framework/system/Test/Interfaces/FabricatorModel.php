@@ -67,7 +67,7 @@ interface FabricatorModel
      * Sets $useSoftDeletes value so that we can temporarily override
      * the softdeletes settings. Can be used for all find* methods.
      *
-     * @param bool $val
+     * @param boolean $val
      *
      * @return Model
      */

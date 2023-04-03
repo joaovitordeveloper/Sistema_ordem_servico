@@ -15,7 +15,7 @@ use CodeIgniter\HTTP\Exceptions\HTTPException;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Validation\Exceptions\ValidationException;
-use CodeIgniter\Validation\ValidationInterface;
+use CodeIgniter\Validation\Validation;
 use Config\Services;
 use Psr\Log\LoggerInterface;
 
@@ -62,7 +62,7 @@ class Controller
     /**
      * Once validation has been run, will hold the Validation instance.
      *
-     * @var ValidationInterface
+     * @var Validation
      */
     protected $validator;
 

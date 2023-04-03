@@ -13,9 +13,6 @@ namespace CodeIgniter\Test\Mock;
 
 use CodeIgniter\Database\BaseResult;
 
-/**
- * @extends BaseResult<object|resource, object|resource>
- */
 class MockResult extends BaseResult
 {
     /**

@@ -59,24 +59,10 @@ class TestLogger extends Logger
      *
      * @return bool
      */
-    public static function didLog(string $level, $message, bool $useExactComparison = true)
+    public static function didLog(string $level, $message)
     {
-        $lowerLevel = strtolower($level);
-
         foreach (self::$op_logs as $log) {
-            if (strtolower($log['level']) !== $lowerLevel) {
-                continue;
-            }
-
-            if ($useExactComparison) {
-                if ($log['message'] === $message) {
-                    return true;
-                }
-
-                continue;
-            }
-
-            if (strpos($log['message'], $message) !== false) {
+            if (strtolower($log['level']) === strtolower($level) && $message === $log['message']) {
                 return true;
             }
         }

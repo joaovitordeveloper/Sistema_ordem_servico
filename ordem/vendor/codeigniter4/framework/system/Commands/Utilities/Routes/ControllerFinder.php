@@ -44,7 +44,6 @@ final class ControllerFinder
         $nsArray = explode('\\', trim($this->namespace, '\\'));
         $count   = count($nsArray);
         $ns      = '';
-        $files   = [];
 
         for ($i = 0; $i < $count; $i++) {
             $ns .= '\\' . array_shift($nsArray);

@@ -20,6 +20,7 @@ use CodeIgniter\Database\Query;
 use CodeIgniter\Exceptions\ModelException;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\Pager\Pager;
+use CodeIgniter\Validation\Validation;
 use CodeIgniter\Validation\ValidationInterface;
 use Config\Services;
 use InvalidArgumentException;
@@ -199,7 +200,7 @@ abstract class BaseModel
     /**
      * Our validator instance.
      *
-     * @var ValidationInterface
+     * @var Validation
      */
     protected $validation;
 
@@ -260,34 +261,6 @@ abstract class BaseModel
     protected $afterUpdate = [];
 
     /**
-     * Callbacks for beforeInsertBatch
-     *
-     * @var array
-     */
-    protected $beforeInsertBatch = [];
-
-    /**
-     * Callbacks for afterInsertBatch
-     *
-     * @var array
-     */
-    protected $afterInsertBatch = [];
-
-    /**
-     * Callbacks for beforeUpdateBatch
-     *
-     * @var array
-     */
-    protected $beforeUpdateBatch = [];
-
-    /**
-     * Callbacks for afterUpdateBatch
-     *
-     * @var array
-     */
-    protected $afterUpdateBatch = [];
-
-    /**
      * Callbacks for beforeFind
      *
      * @var array
@@ -315,11 +288,6 @@ abstract class BaseModel
      */
     protected $afterDelete = [];
 
-    /**
-     * Whether to allow inserting empty data.
-     */
-    protected bool $allowEmptyInserts = false;
-
     public function __construct(?ValidationInterface $validation = null)
     {
         $this->tempReturnType     = $this->returnType;
@@ -327,7 +295,7 @@ abstract class BaseModel
         $this->tempAllowCallbacks = $this->allowCallbacks;
 
         /**
-         * @var ValidationInterface|null $validation
+         * @var Validation|null $validation
          */
         $validation ??= Services::validation(null, false);
         $this->validation = $validation;
@@ -758,7 +726,7 @@ abstract class BaseModel
 
         // doProtectFields() can further remove elements from
         // $data so we need to check for empty dataset again
-        if (! $this->allowEmptyInserts && empty($data)) {
+        if (empty($data)) {
             throw DataException::forEmptyDataset('insert');
         }
 
@@ -865,27 +833,7 @@ abstract class BaseModel
         // Restore $cleanValidationRules
         $this->cleanValidationRules = $cleanValidationRules;
 
-        $eventData = ['data' => $set];
-
-        if ($this->tempAllowCallbacks) {
-            $eventData = $this->trigger('beforeInsertBatch', $eventData);
-        }
-
-        $result = $this->doInsertBatch($eventData['data'], $escape, $batchSize, $testing);
-
-        $eventData = [
-            'data'   => $eventData['data'],
-            'result' => $result,
-        ];
-
-        if ($this->tempAllowCallbacks) {
-            // Trigger afterInsert events with the inserted data and new ID
-            $this->trigger('afterInsertBatch', $eventData);
-        }
-
-        $this->tempAllowCallbacks = $this->allowCallbacks;
-
-        return $result;
+        return $this->doInsertBatch($set, $escape, $batchSize, $testing);
     }
 
     /**
@@ -899,10 +847,6 @@ abstract class BaseModel
      */
     public function update($id = null, $data = null): bool
     {
-        if (is_bool($id)) {
-            throw new InvalidArgumentException('update(): argument #1 ($id) should not be boolean.');
-        }
-
         if (is_numeric($id) || is_string($id)) {
             $id = [$id];
         }
@@ -914,12 +858,12 @@ abstract class BaseModel
             return false;
         }
 
-        // Must be called first, so we don't
+        // Must be called first so we don't
         // strip out updated_at values.
         $data = $this->doProtectFields($data);
 
         // doProtectFields() can further remove elements from
-        // $data, so we need to check for empty dataset again
+        // $data so we need to check for empty dataset again
         if (empty($data)) {
             throw DataException::forEmptyDataset('update');
         }
@@ -1006,27 +950,7 @@ abstract class BaseModel
             }
         }
 
-        $eventData = ['data' => $set];
-
-        if ($this->tempAllowCallbacks) {
-            $eventData = $this->trigger('beforeUpdateBatch', $eventData);
-        }
-
-        $result = $this->doUpdateBatch($eventData['data'], $index, $batchSize, $returnSQL);
-
-        $eventData = [
-            'data'   => $eventData['data'],
-            'result' => $result,
-        ];
-
-        if ($this->tempAllowCallbacks) {
-            // Trigger afterInsert events with the inserted data and new ID
-            $this->trigger('afterUpdateBatch', $eventData);
-        }
-
-        $this->tempAllowCallbacks = $this->allowCallbacks;
-
-        return $result;
+        return $this->doUpdateBatch($set, $index, $batchSize, $returnSQL);
     }
 
     /**
@@ -1041,10 +965,6 @@ abstract class BaseModel
      */
     public function delete($id = null, bool $purge = false)
     {
-        if (is_bool($id)) {
-            throw new InvalidArgumentException('delete(): argument #1 ($id) should not be boolean.');
-        }
-
         if ($id && (is_numeric($id) || is_string($id))) {
             $id = [$id];
         }
@@ -1676,7 +1596,7 @@ abstract class BaseModel
             throw new InvalidArgumentException(sprintf('Invalid type "%s" used upon transforming data to array.', $type));
         }
 
-        if (! $this->allowEmptyInserts && empty($data)) {
+        if (empty($data)) {
             throw DataException::forEmptyDataset($type);
         }
 
@@ -1699,7 +1619,7 @@ abstract class BaseModel
         }
 
         // If it's still empty here, means $data is no change or is empty object
-        if (! $this->allowEmptyInserts && empty($data)) {
+        if (empty($data)) {
             throw DataException::forEmptyDataset($type);
         }
 
@@ -1804,15 +1724,5 @@ abstract class BaseModel
         }
 
         return $rules;
-    }
-
-    /**
-     * Sets $allowEmptyInserts.
-     */
-    public function allowEmptyInserts(bool $value = true): self
-    {
-        $this->allowEmptyInserts = $value;
-
-        return $this;
     }
 }

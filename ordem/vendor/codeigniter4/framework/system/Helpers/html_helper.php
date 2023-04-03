@@ -128,7 +128,7 @@ if (! function_exists('img')) {
             unset($attributes['alt'], $attributes['src']);
         }
 
-        return $img . stringify_attributes($attributes) . _solidus() . '>';
+        return $img . stringify_attributes($attributes) . ' />';
     }
 }
 
@@ -214,7 +214,7 @@ if (! function_exists('script_tag')) {
             }
         }
 
-        return rtrim($script) . '></script>';
+        return $script . 'type="text/javascript"></script>';
     }
 }
 
@@ -222,21 +222,15 @@ if (! function_exists('link_tag')) {
     /**
      * Link
      *
-     * Generates link tag
+     * Generates link to a CSS file
      *
-     * @param array<string, bool|string>|string $href      Stylesheet href or an array
-     * @param bool                              $indexPage should indexPage be added to the CSS path.
+     * @param array|string $href      Stylesheet href or an array
+     * @param bool         $indexPage should indexPage be added to the CSS path.
      */
-    function link_tag(
-        $href = '',
-        string $rel = 'stylesheet',
-        string $type = 'text/css',
-        string $title = '',
-        string $media = '',
-        bool $indexPage = false,
-        string $hreflang = ''
-    ): string {
-        $attributes = [];
+    function link_tag($href = '', string $rel = 'stylesheet', string $type = 'text/css', string $title = '', string $media = '', bool $indexPage = false, string $hreflang = ''): string
+    {
+        $link = '<link ';
+
         // extract fields if needed
         if (is_array($href)) {
             $rel       = $href['rel'] ?? $rel;
@@ -249,30 +243,34 @@ if (! function_exists('link_tag')) {
         }
 
         if (! preg_match('#^([a-z]+:)?//#i', $href)) {
-            $attributes['href'] = $indexPage ? site_url($href) : slash_item('baseURL') . $href;
+            if ($indexPage === true) {
+                $link .= 'href="' . site_url($href) . '" ';
+            } else {
+                $link .= 'href="' . slash_item('baseURL') . $href . '" ';
+            }
         } else {
-            $attributes['href'] = $href;
+            $link .= 'href="' . $href . '" ';
         }
 
         if ($hreflang !== '') {
-            $attributes['hreflang'] = $hreflang;
+            $link .= 'hreflang="' . $hreflang . '" ';
         }
 
-        $attributes['rel'] = $rel;
+        $link .= 'rel="' . $rel . '" ';
 
-        if ($type !== '' && $rel !== 'canonical' && $hreflang === '' && ! ($rel === 'alternate' && $media !== '')) {
-            $attributes['type'] = $type;
+        if (! in_array($rel, ['alternate', 'canonical'], true)) {
+            $link .= 'type="' . $type . '" ';
         }
 
         if ($media !== '') {
-            $attributes['media'] = $media;
+            $link .= 'media="' . $media . '" ';
         }
 
         if ($title !== '') {
-            $attributes['title'] = $title;
+            $link .= 'title="' . $title . '" ';
         }
 
-        return '<link' . stringify_attributes($attributes) . _solidus() . '>';
+        return $link . '/>';
     }
 }
 
@@ -425,7 +423,7 @@ if (! function_exists('source')) {
             $source .= ' ' . $attributes;
         }
 
-        return $source . _solidus() . '>';
+        return $source . ' />';
     }
 }
 
@@ -444,7 +442,7 @@ if (! function_exists('track')) {
                 . '" kind="' . $kind
                 . '" srclang="' . $srcLanguage
                 . '" label="' . $label
-                . '"' . _solidus() . '>';
+                . '" />';
     }
 }
 
@@ -498,7 +496,7 @@ if (! function_exists('param')) {
         return '<param name="' . $name
                 . '" type="' . $type
                 . '" value="' . $value
-                . '" ' . $attributes . _solidus() . '>';
+                . '" ' . $attributes . ' />';
     }
 }
 
@@ -520,7 +518,7 @@ if (! function_exists('embed')) {
 
         return '<embed src="' . $src
                 . '" type="' . $type . '" '
-                . $attributes . _solidus() . ">\n";
+                . $attributes . " />\n";
     }
 }
 

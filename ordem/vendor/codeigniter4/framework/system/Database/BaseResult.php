@@ -14,10 +14,7 @@ namespace CodeIgniter\Database;
 use CodeIgniter\Entity\Entity;
 
 /**
- * @template TConnection of object|resource
- * @template TResult of object|resource
- *
- * @implements ResultInterface<TConnection, TResult>
+ * Class BaseResult
  */
 abstract class BaseResult implements ResultInterface
 {
@@ -25,7 +22,6 @@ abstract class BaseResult implements ResultInterface
      * Connection ID
      *
      * @var object|resource
-     * @phpstan-var TConnection
      */
     public $connID;
 
@@ -33,7 +29,6 @@ abstract class BaseResult implements ResultInterface
      * Result ID
      *
      * @var false|object|resource
-     * @phpstan-var false|TResult
      */
     public $resultID;
 
@@ -84,8 +79,6 @@ abstract class BaseResult implements ResultInterface
      *
      * @param object|resource $connID
      * @param object|resource $resultID
-     * @phpstan-param TConnection $connID
-     * @phpstan-param TResult     $resultID
      */
     public function __construct(&$connID, &$resultID)
     {
@@ -124,7 +117,7 @@ abstract class BaseResult implements ResultInterface
             return $this->customResultObject[$className];
         }
 
-        if (! $this->isValidResultId()) {
+        if (is_bool($this->resultID) || ! $this->resultID) {
             return [];
         }
 
@@ -178,7 +171,7 @@ abstract class BaseResult implements ResultInterface
         // In the event that query caching is on, the result_id variable
         // will not be a valid resource so we'll simply return an empty
         // array.
-        if (! $this->isValidResultId()) {
+        if (is_bool($this->resultID) || ! $this->resultID) {
             return [];
         }
 
@@ -215,7 +208,7 @@ abstract class BaseResult implements ResultInterface
         // In the event that query caching is on, the result_id variable
         // will not be a valid resource so we'll simply return an empty
         // array.
-        if (! $this->isValidResultId()) {
+        if (is_bool($this->resultID) || ! $this->resultID) {
             return [];
         }
 
@@ -468,11 +461,6 @@ abstract class BaseResult implements ResultInterface
         }
 
         return $this->numRows = count($this->getResultArray());
-    }
-
-    private function isValidResultId(): bool
-    {
-        return is_resource($this->resultID) || is_object($this->resultID);
     }
 
     /**

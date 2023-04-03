@@ -44,7 +44,7 @@ trait RequestTrait
     /**
      * Gets the user's IP address.
      *
-     * @return string IP address if it can be detected.
+     * @return string IP address if it can be detected, or empty string.
      *                If the IP address is not a valid IP address,
      *                then will return '0.0.0.0'.
      */
@@ -64,19 +64,16 @@ trait RequestTrait
          */
         // @phpstan-ignore-next-line
         $proxyIPs = $this->proxyIPs ?? config('App')->proxyIPs;
-        // @phpstan-ignore-next-line
-        if (! empty($proxyIPs) && (! is_array($proxyIPs) || is_int(array_key_first($proxyIPs)))) {
-            throw new ConfigException(
-                'You must set an array with Proxy IP address key and HTTP header name value in Config\App::$proxyIPs.'
-            );
+        if (! empty($proxyIPs)) {
+            // @phpstan-ignore-next-line
+            if (! is_array($proxyIPs) || is_int(array_key_first($proxyIPs))) {
+                throw new ConfigException(
+                    'You must set an array with Proxy IP address key and HTTP header name value in Config\App::$proxyIPs.'
+                );
+            }
         }
 
         $this->ipAddress = $this->getServer('REMOTE_ADDR');
-
-        // If this is a CLI request, $this->ipAddress is null.
-        if ($this->ipAddress === null) {
-            return $this->ipAddress = '0.0.0.0';
-        }
 
         if ($proxyIPs) {
             // @TODO Extract all this IP address logic to another class.
@@ -156,7 +153,7 @@ trait RequestTrait
             return $this->ipAddress = '0.0.0.0';
         }
 
-        return $this->ipAddress;
+        return empty($this->ipAddress) ? '' : $this->ipAddress;
     }
 
     /**
@@ -192,7 +189,7 @@ trait RequestTrait
      *
      * @param array|string|null $index  Index for item to be fetched from $_SERVER
      * @param int|null          $filter A filter name to be applied
-     * @param array|int|null    $flags
+     * @param null              $flags
      *
      * @return mixed
      */
@@ -204,9 +201,9 @@ trait RequestTrait
     /**
      * Fetch an item from the $_ENV array.
      *
-     * @param array|string|null $index  Index for item to be fetched from $_ENV
-     * @param int|null          $filter A filter name to be applied
-     * @param array|int|null    $flags
+     * @param null $index  Index for item to be fetched from $_ENV
+     * @param null $filter A filter name to be applied
+     * @param null $flags
      *
      * @return mixed
      */

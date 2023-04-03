@@ -12,8 +12,7 @@
 namespace CodeIgniter\Database;
 
 /**
- * @template TConnection of object|resource
- * @template TResult of object|resource
+ * Interface ResultInterface
  */
 interface ResultInterface
 {
@@ -126,11 +125,6 @@ interface ResultInterface
      * @return mixed
      */
     public function getPreviousRow(string $type = 'object');
-
-    /**
-     * Returns number of rows in the result set.
-     */
-    public function getNumRows(): int;
 
     /**
      * Returns an unbuffered row and move the pointer to the next row.

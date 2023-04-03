@@ -43,7 +43,6 @@ use ReflectionProperty;
  * @method $this groupBy($by, ?bool $escape = null)
  * @method $this groupEnd()
  * @method $this groupStart()
- * @method $this having($key, $value = null, ?bool $escape = null)
  * @method $this havingGroupEnd()
  * @method $this havingGroupStart()
  * @method $this havingIn(?string $key = null, $values = null, ?bool $escape = null)
@@ -301,34 +300,7 @@ class Model extends BaseModel
             $builder->set($key, $val, $escape[$key] ?? null);
         }
 
-        if ($this->allowEmptyInserts && empty($data)) {
-            $table = $this->db->protectIdentifiers($this->table, true, null, false);
-            if ($this->db->getPlatform() === 'MySQLi') {
-                $sql = 'INSERT INTO ' . $table . ' VALUES ()';
-            } elseif ($this->db->getPlatform() === 'OCI8') {
-                $allFields = $this->db->protectIdentifiers(
-                    array_map(
-                        static fn ($row) => $row->name,
-                        $this->db->getFieldData($this->table)
-                    ),
-                    false,
-                    true
-                );
-
-                $sql = sprintf(
-                    'INSERT INTO %s (%s) VALUES (%s)',
-                    $table,
-                    implode(',', $allFields),
-                    substr(str_repeat(',DEFAULT', count($allFields)), 1)
-                );
-            } else {
-                $sql = 'INSERT INTO ' . $table . ' DEFAULT VALUES';
-            }
-
-            $result = $this->db->query($sql);
-        } else {
-            $result = $builder->insert();
-        }
+        $result = $builder->insert();
 
         // If insertion succeeded then save the insert ID
         if ($result) {
@@ -387,12 +359,6 @@ class Model extends BaseModel
             $builder->set($key, $val, $escape[$key] ?? null);
         }
 
-        if ($builder->getCompiledQBWhere() === []) {
-            throw new DatabaseException(
-                'Updates are not allowed unless they contain a "where" or "like" clause.'
-            );
-        }
-
         return $builder->update();
     }
 
@@ -428,7 +394,6 @@ class Model extends BaseModel
      */
     protected function doDelete($id = null, bool $purge = false)
     {
-        $set     = [];
         $builder = $this->builder();
 
         if ($id) {
@@ -437,9 +402,13 @@ class Model extends BaseModel
 
         if ($this->useSoftDeletes && ! $purge) {
             if (empty($builder->getCompiledQBWhere())) {
-                throw new DatabaseException(
-                    'Deletes are not allowed unless they contain a "where" or "like" clause.'
-                );
+                if (CI_DEBUG) {
+                    throw new DatabaseException(
+                        'Deletes are not allowed unless they contain a "where" or "like" clause.'
+                    );
+                }
+
+                return false; // @codeCoverageIgnore
             }
 
             $builder->where($this->deletedField);
@@ -597,7 +566,7 @@ class Model extends BaseModel
         }
 
         // When $reset === false, the $tempUseSoftDeletes will be
-        // dependent on $useSoftDeletes value because we don't
+        // dependant on $useSoftDeletes value because we don't
         // want to add the same "where" condition for the second time
         $this->tempUseSoftDeletes = $reset
             ? $this->useSoftDeletes
@@ -716,12 +685,8 @@ class Model extends BaseModel
             }
         }
 
-        if ($this->useAutoIncrement === false) {
-            if (is_array($data) && isset($data[$this->primaryKey])) {
-                $this->tempPrimaryKeyValue = $data[$this->primaryKey];
-            } elseif (is_object($data) && isset($data->{$this->primaryKey})) {
-                $this->tempPrimaryKeyValue = $data->{$this->primaryKey};
-            }
+        if ($this->useAutoIncrement === false && isset($data[$this->primaryKey])) {
+            $this->tempPrimaryKeyValue = $data[$this->primaryKey];
         }
 
         $this->escape   = $this->tempData['escape'] ?? [];

@@ -18,11 +18,11 @@
  * @var \CodeIgniter\View\Parser   $parser
  */
 ?>
-<style>
+<style type="text/css">
     <?= preg_replace('#[\r\n\t ]+#', ' ', file_get_contents(__DIR__ . '/toolbar.css')) ?>
 </style>
 
-<script id="toolbar_js">
+<script id="toolbar_js" type="text/javascript">
     <?= file_get_contents(__DIR__ . '/toolbar.js') ?>
 </script>
 <div id="debug-icon" class="debug-bar-ndisplay">
@@ -264,7 +264,7 @@
         <?= $parser->setData($config)->render('_config.tpl') ?>
     </div>
 </div>
-<style>
+<style type="text/css">
 <?php foreach ($styles as $name => $style): ?>
 <?= sprintf(".%s { %s }\n", $name, $style) ?>
 <?php endforeach ?>

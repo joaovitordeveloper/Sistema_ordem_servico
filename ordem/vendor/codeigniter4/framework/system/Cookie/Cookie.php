@@ -37,8 +37,6 @@ use ReturnTypeWillChange;
  * $cookie2 = $cookie->withName('prod_cookie');
  * $cookie2->getName(); // prod_cookie
  * ```
- *
- * @template-implements ArrayAccess<string, bool|int|string>
  */
 class Cookie implements ArrayAccess, CloneableCookieInterface
 {
@@ -566,7 +564,7 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
     /**
      * Whether an offset exists.
      *
-     * @param string $offset
+     * @param mixed $offset
      */
     public function offsetExists($offset): bool
     {
@@ -576,9 +574,9 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
     /**
      * Offset to retrieve.
      *
-     * @param string $offset
+     * @param mixed $offset
      *
-     * @return bool|int|string
+     * @return mixed
      *
      * @throws InvalidArgumentException
      */
@@ -595,8 +593,8 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
     /**
      * Offset to set.
      *
-     * @param string $offset
-     * @param mixed  $value
+     * @param mixed $offset
+     * @param mixed $value
      *
      * @throws LogicException
      */
@@ -608,7 +606,7 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
     /**
      * Offset to unset.
      *
-     * @param string $offset
+     * @param mixed $offset
      *
      * @throws LogicException
      */

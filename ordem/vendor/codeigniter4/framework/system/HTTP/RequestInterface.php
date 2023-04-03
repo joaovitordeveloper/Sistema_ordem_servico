@@ -12,11 +12,9 @@
 namespace CodeIgniter\HTTP;
 
 /**
- * Representation of an incoming, server-side HTTP request.
- *
- * Corresponds to Psr7\ServerRequestInterface.
+ * Expected behavior of an HTTP request
  */
-interface RequestInterface extends OutgoingRequestInterface
+interface RequestInterface
 {
     /**
      * Gets the user's IP address.
@@ -37,11 +35,21 @@ interface RequestInterface extends OutgoingRequestInterface
     public function isValidIP(string $ip, ?string $which = null): bool;
 
     /**
+     * Get the request method.
+     * An extension of PSR-7's getMethod to allow casing.
+     *
+     * @param bool $upper Whether to return in upper or lower case.
+     *
+     * @deprecated The $upper functionality will be removed and this will revert to its PSR-7 equivalent
+     */
+    public function getMethod(bool $upper = false): string;
+
+    /**
      * Fetch an item from the $_SERVER array.
      * Supplied by RequestTrait.
      *
-     * @param array|string|null $index  Index for item to be fetched from $_SERVER
-     * @param int|null          $filter A filter name to be applied
+     * @param string $index  Index for item to be fetched from $_SERVER
+     * @param null   $filter A filter name to be applied
      *
      * @return mixed
      */

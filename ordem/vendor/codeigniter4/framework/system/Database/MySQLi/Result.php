@@ -13,14 +13,10 @@ namespace CodeIgniter\Database\MySQLi;
 
 use CodeIgniter\Database\BaseResult;
 use CodeIgniter\Entity\Entity;
-use mysqli;
-use mysqli_result;
 use stdClass;
 
 /**
  * Result for MySQLi
- *
- * @extends BaseResult<mysqli, mysqli_result>
  */
 class Result extends BaseResult
 {

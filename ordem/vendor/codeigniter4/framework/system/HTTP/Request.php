@@ -12,12 +12,11 @@
 namespace CodeIgniter\HTTP;
 
 use CodeIgniter\Validation\FormatRules;
-use Config\App;
 
 /**
- * Representation of an incoming, server-side HTTP request.
+ * Representation of an HTTP request.
  */
-class Request extends OutgoingRequest implements RequestInterface
+class Request extends Message implements MessageInterface, RequestInterface
 {
     use RequestTrait;
 
@@ -31,9 +30,23 @@ class Request extends OutgoingRequest implements RequestInterface
     protected $proxyIPs;
 
     /**
+     * Request method.
+     *
+     * @var string
+     */
+    protected $method;
+
+    /**
+     * A URI instance.
+     *
+     * @var URI
+     */
+    protected $uri;
+
+    /**
      * Constructor.
      *
-     * @param App $config
+     * @param object $config
      *
      * @deprecated The $config is no longer needed and will be removed in a future version
      */

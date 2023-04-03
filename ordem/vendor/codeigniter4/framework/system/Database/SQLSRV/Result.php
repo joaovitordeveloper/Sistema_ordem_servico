@@ -17,8 +17,6 @@ use stdClass;
 
 /**
  * Result for SQLSRV
- *
- * @extends BaseResult<resource, resource>
  */
 class Result extends BaseResult
 {

@@ -86,11 +86,7 @@ class Rules
     public function is_not_unique(?string $str, string $field, array $data): bool
     {
         // Grab any data for exclusion of a single row.
-        [$field, $whereField, $whereValue] = array_pad(
-            explode(',', $field),
-            3,
-            null
-        );
+        [$field, $whereField, $whereValue] = array_pad(explode(',', $field), 3, null);
 
         // Break the table and field apart
         sscanf($field, '%[^.].%[^.]', $table, $field);
@@ -101,10 +97,7 @@ class Rules
             ->where($field, $str)
             ->limit(1);
 
-        if (
-            ! empty($whereField) && ! empty($whereValue)
-            && ! preg_match('/^\{(\w+)\}$/', $whereValue)
-        ) {
+        if (! empty($whereField) && ! empty($whereValue) && ! preg_match('/^\{(\w+)\}$/', $whereValue)) {
             $row = $row->where($whereField, $whereValue);
         }
 
@@ -132,11 +125,7 @@ class Rules
      */
     public function is_unique(?string $str, string $field, array $data): bool
     {
-        [$field, $ignoreField, $ignoreValue] = array_pad(
-            explode(',', $field),
-            3,
-            null
-        );
+        [$field, $ignoreField, $ignoreValue] = array_pad(explode(',', $field), 3, null);
 
         sscanf($field, '%[^.].%[^.]', $table, $field);
 
@@ -146,10 +135,7 @@ class Rules
             ->where($field, $str)
             ->limit(1);
 
-        if (
-            ! empty($ignoreField) && ! empty($ignoreValue)
-            && ! preg_match('/^\{(\w+)\}$/', $ignoreValue)
-        ) {
+        if (! empty($ignoreField) && ! empty($ignoreValue) && ! preg_match('/^\{(\w+)\}$/', $ignoreValue)) {
             $row = $row->where("{$ignoreField} !=", $ignoreValue);
         }
 

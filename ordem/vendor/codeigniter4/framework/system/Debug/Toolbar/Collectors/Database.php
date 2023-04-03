@@ -140,7 +140,6 @@ class Database extends BaseCollector
      */
     public function display(): array
     {
-        $data            = [];
         $data['queries'] = array_map(static function (array $query) {
             $isDuplicate = $query['duplicate'] === true;
 

@@ -89,7 +89,6 @@ class SessionMigrationGenerator extends BaseCommand
      */
     protected function prepare(string $class): string
     {
-        $data            = [];
         $data['session'] = true;
         $data['table']   = $this->getOption('t');
         $data['DBGroup'] = $this->getOption('g');

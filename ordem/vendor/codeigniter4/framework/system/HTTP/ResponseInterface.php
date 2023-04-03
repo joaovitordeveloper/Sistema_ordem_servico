@@ -12,7 +12,6 @@
 namespace CodeIgniter\HTTP;
 
 use CodeIgniter\Cookie\Cookie;
-use CodeIgniter\Cookie\CookieStore;
 use CodeIgniter\HTTP\Exceptions\HTTPException;
 use CodeIgniter\Pager\PagerInterface;
 use DateTime;
@@ -29,8 +28,10 @@ use InvalidArgumentException;
  * - Status code and reason phrase
  * - Headers
  * - Message body
+ *
+ * @mixin RedirectResponse
  */
-interface ResponseInterface extends MessageInterface
+interface ResponseInterface
 {
     /**
      * Constants for status codes.
@@ -129,14 +130,14 @@ interface ResponseInterface extends MessageInterface
      *                       provided status code; if none is provided, will
      *                       default to the IANA name.
      *
-     * @return $this
+     * @return self
      *
-     * @throws HTTPException For invalid status code arguments.
+     * @throws InvalidArgumentException For invalid status code arguments.
      */
     public function setStatusCode(int $code, string $reason = '');
 
     /**
-     * Gets the response phrase associated with the status code.
+     * Gets the response response phrase associated with the status code.
      *
      * @see http://tools.ietf.org/html/rfc7231#section-6
      * @see http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
@@ -145,22 +146,6 @@ interface ResponseInterface extends MessageInterface
      */
     public function getReason(): string;
 
-    /**
-     * Gets the response reason phrase associated with the status code.
-     *
-     * Because a reason phrase is not a required element in a response
-     * status line, the reason phrase value MAY be null. Implementations MAY
-     * choose to return the default RFC 7231 recommended reason phrase (or those
-     * listed in the IANA HTTP Status Code Registry) for the response's
-     * status code.
-     *
-     * @see http://tools.ietf.org/html/rfc7231#section-6
-     * @see http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
-     *
-     * @return string Reason phrase; must return an empty string if none present.
-     */
-    public function getReasonPhrase();
-
     // --------------------------------------------------------------------
     // Convenience Methods
     // --------------------------------------------------------------------
@@ -168,7 +153,7 @@ interface ResponseInterface extends MessageInterface
     /**
      * Sets the date header
      *
-     * @return $this
+     * @return ResponseInterface
      */
     public function setDate(DateTime $date);
 
@@ -179,8 +164,6 @@ interface ResponseInterface extends MessageInterface
      * preferably, an instance of DateTime.
      *
      * @param DateTime|string $date
-     *
-     * @return $this
      */
     public function setLastModified($date);
 
@@ -189,7 +172,7 @@ interface ResponseInterface extends MessageInterface
      *
      * @see http://tools.ietf.org/html/rfc5988
      *
-     * @return $this
+     * @return Response
      *
      * @todo Recommend moving to Pager
      */
@@ -199,7 +182,7 @@ interface ResponseInterface extends MessageInterface
      * Sets the Content Type header for this response with the mime type
      * and, optionally, the charset.
      *
-     * @return $this
+     * @return ResponseInterface
      */
     public function setContentType(string $mime, string $charset = 'UTF-8');
 
@@ -219,7 +202,7 @@ interface ResponseInterface extends MessageInterface
     /**
      * Returns the current body, converted to JSON is it isn't already.
      *
-     * @return bool|string|null
+     * @return string|null
      *
      * @throws InvalidArgumentException If the body property is not array.
      */
@@ -237,7 +220,7 @@ interface ResponseInterface extends MessageInterface
     /**
      * Retrieves the current body into XML and returns it.
      *
-     * @return bool|string|null
+     * @return mixed|string
      *
      * @throws InvalidArgumentException If the body property is not array.
      */
@@ -252,8 +235,6 @@ interface ResponseInterface extends MessageInterface
     /**
      * Sets the appropriate headers to ensure this response
      * is not cached by the browsers.
-     *
-     * @return $this
      */
     public function noCache();
 
@@ -281,7 +262,7 @@ interface ResponseInterface extends MessageInterface
      *  - proxy-revalidate
      *  - no-transform
      *
-     * @return $this
+     * @return ResponseInterface
      */
     public function setCache(array $options = []);
 
@@ -292,21 +273,21 @@ interface ResponseInterface extends MessageInterface
     /**
      * Sends the output to the browser.
      *
-     * @return $this
+     * @return ResponseInterface
      */
     public function send();
 
     /**
      * Sends the headers of this HTTP request to the browser.
      *
-     * @return $this
+     * @return Response
      */
     public function sendHeaders();
 
     /**
      * Sends the Body of the message to the browser.
      *
-     * @return $this
+     * @return Response
      */
     public function sendBody();
 
@@ -370,13 +351,6 @@ interface ResponseInterface extends MessageInterface
      */
     public function getCookies();
 
-    /**
-     * Returns the `CookieStore` instance.
-     *
-     * @return CookieStore
-     */
-    public function getCookieStore();
-
     // --------------------------------------------------------------------
     // Response Methods
     // --------------------------------------------------------------------
@@ -406,13 +380,4 @@ interface ResponseInterface extends MessageInterface
      * @return DownloadResponse|null
      */
     public function download(string $filename = '', $data = '', bool $setMime = false);
-
-    // --------------------------------------------------------------------
-    // CSP Methods
-    // --------------------------------------------------------------------
-
-    /**
-     * Get Content Security Policy handler.
-     */
-    public function getCSP(): ContentSecurityPolicy;
 }

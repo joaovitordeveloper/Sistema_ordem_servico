@@ -690,7 +690,11 @@ class ContentSecurityPolicy
      */
     protected function buildHeaders(ResponseInterface $response)
     {
-        // Ensure both headers are available and arrays...
+        /**
+         * Ensure both headers are available and arrays...
+         *
+         * @var Response $response
+         */
         $response->setHeader('Content-Security-Policy', []);
         $response->setHeader('Content-Security-Policy-Report-Only', []);
 
