@@ -4,6 +4,7 @@ namespace App\Libraries;
 
 use App\Models\GrupoUsuarioModel;
 use App\Models\UsuarioModel;
+use SebastianBergmann\Type\FalseType;
 
 class Autenticacao
 {
@@ -111,6 +112,9 @@ class Autenticacao
             return null;
         }
 
+        //definindo as permissões do usuario logado
+        $usuario = $this->definePermissoesDoUsuarioLogado($usuario);
+
         return $usuario;
     }
 
@@ -149,4 +153,45 @@ class Autenticacao
         return true;
 
     }
+
+    /**
+     * Método que define as permissões que o usuário logado possui.
+     * Usado exclusivamente no método pegaUsuarioDaSessao()
+     *
+     * @param object $usuario
+     * @return object
+     */
+    private function definePermissoesDoUsuarioLogado($usuario):object
+    {
+        //define se o usuário logado e um admin
+        $usuario->is_admin = $this->isAdmin();
+
+        if ($usuario->is_admin == true) {
+
+            $usuario->is_cliente = false;
+
+        }else {
+
+            $usuario->is_cliente = $this->isCliente();
+        }
+
+        if ($usuario->is_admin == false && $usuario->is_cliente == false) {
+            $usuario->permissoes = $this->recuperaPermissoesDoUsuarioLogado();
+        }
+
+        return $usuario;
+    }
+
+    /**
+     * Método que retorna as permissões do usuário logado.
+     *
+     * @return array
+     */
+    private function recuperaPermissoesDoUsuarioLogado():array
+    {
+        $permissoesDoUsuario = $this->usuarioModel->recuperaPermissoesDoUsuarioLogado(session()->get('usuario_id'));
+
+        return array_column($permissoesDoUsuario, 'permissao');
+    }
+
 }

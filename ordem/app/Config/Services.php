@@ -2,6 +2,7 @@
 
 namespace Config;
 
+use App\Libraries\Autenticacao;
 use CodeIgniter\Config\BaseService;
 
 /**
@@ -19,14 +20,14 @@ use CodeIgniter\Config\BaseService;
  */
 class Services extends BaseService
 {
-    /*
-     * public static function example($getShared = true)
-     * {
-     *     if ($getShared) {
-     *         return static::getSharedInstance('example');
-     *     }
-     *
-     *     return new \CodeIgniter\Example();
-     * }
-     */
+    
+     public static function autenticacao($getShared = true)
+     {
+         if ($getShared) {
+             return static::getSharedInstance('autenticacao');
+         }
+    
+         return new \App\Libraries\Autenticacao;
+     }
+     
 }
