@@ -496,6 +496,35 @@ class Usuarios extends BaseController
     }
 
     /**
+     * Função para a edição de senha
+     *
+     * @return void
+     */
+    public function editarSenha()
+    {
+        $data = [
+            'titulo' => 'Edite sua senha de acesso',
+        ];
+
+        return view('Usuarios/editar_senha', $data);
+    }
+
+    /**
+     * Método para atualizar a senha do usuário.
+     *
+     * @return void
+     */
+    public function atualizarSenha()
+    {
+        if (!$this->request->isAJAX()) {
+            return redirect()->back();
+        }
+
+        echo '<pre>';
+        print_r($this->request->getPost());exit;
+    }
+
+    /**
      * Metodo que recupera o usuario.
      *
      * @param integer|null $id
