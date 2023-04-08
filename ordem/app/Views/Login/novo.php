@@ -53,6 +53,8 @@
                 <div id="response">
 
                 </div>
+                <!--Abaixo temos o include para o retorno das mensagens para apresentação ao usuario final-->
+                <?php echo $this->include('Layout/_mensagens.php') ?>
 
                 <div class="form-group">
                   <input id="login-username" type="email" name="email" required data-msg="Por favor informe seu e-mail" class="input-material">
@@ -100,7 +102,7 @@
             $("#btn-login").val('Por favor aguarde...');
           },
           success: function(response) {
-            $("#btn-login").val('Salvar');
+            $("#btn-login").val('Entrar');
             $("#btn-login").removeAttr("disabled");
             $('[name=csrf_ordem]').val(response.token);
 
@@ -121,7 +123,7 @@
           },
           error: function() {
             alert('Não foi possivel processar a solicitação. Por favor entre em contato com o suporte técnico.');
-            $("#btn-login").val('Salvar');
+            $("#btn-login").val('Entrar');
             $("#btn-login").removeAttr("disabled");
           }
         });
