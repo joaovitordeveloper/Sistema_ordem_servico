@@ -7,6 +7,7 @@ class Home extends BaseController
 {
     public function index()
     {
+        //dd(usuario_logado());
         $data = [
             'titulo' => 'Home'
         ];
