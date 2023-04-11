@@ -34,6 +34,10 @@
     <div class="form d-flex align-items-center">
       <div class="content">
 
+        <div id="response">
+
+        </div>
+
         <?php echo form_open('/', ['id' => 'form', 'class' => 'form-validate']); ?>
         <div class="form-group">
           <input id="login-username" type="email" name="email" required data-msg="Por favor informe seu e-mail" class="input-material">
@@ -58,54 +62,54 @@
 <?php $this->section('scripts'); ?>
 
 <script>
-    $(document).ready(function() {
-      $("#form").on('submit', function(e) {
-        e.preventDefault();
+  $(document).ready(function() {
+    $("#form").on('submit', function(e) {
+      e.preventDefault();
 
-        $.ajax({
-          type: 'POST',
-          url: '<?php echo site_url('login/logar'); ?>',
-          data: new FormData(this),
-          dataType: 'json',
-          contentType: false,
-          cache: false,
-          processData: false,
-          beforeSend: function() {
-            $("#response").html('');
-            $("#btn-login").val('Por favor aguarde...');
-          },
-          success: function(response) {
-            $("#btn-login").val('Entrar');
-            $("#btn-login").removeAttr("disabled");
-            $('[name=csrf_ordem]').val(response.token);
+      $.ajax({
+        type: 'POST',
+        url: '<?php echo site_url('login/logar'); ?>',
+        data: new FormData(this),
+        dataType: 'json',
+        contentType: false,
+        cache: false,
+        processData: false,
+        beforeSend: function() {
+          $("#response").html('');
+          $("#btn-login").val('Por favor aguarde...');
+        },
+        success: function(response) {
+          $("#btn-login").val('Entrar');
+          $("#btn-login").removeAttr("disabled");
+          $('[name=csrf_ordem]').val(response.token);
 
-            if (!response.erro) {
-              //tudo certo na atualização do usuario.
-              window.location.href = "<?php echo site_url() ?>" + response.redirect;
-            }
-
-            if (response.erro) {
-              $("#response").html('<div class="alert alert-danger">' + response.erro + '</div>');
-
-              if (response.erros_model) {
-                $.each(response.erros_model, function(key, value) {
-                  $("#response").append('<ul class="list-unstyled"><li class="text-danger">' + value + '</li></ul>')
-                });
-              }
-            }
-          },
-          error: function() {
-            alert('Não foi possivel processar a solicitação. Por favor entre em contato com o suporte técnico.');
-            $("#btn-login").val('Entrar');
-            $("#btn-login").removeAttr("disabled");
+          if (!response.erro) {
+            //tudo certo na atualização do usuario.
+            window.location.href = "<?php echo site_url() ?>" + response.redirect;
           }
-        });
-      })
 
-      $("#form").submit(function() {
-        $(this).find(":submit").attr('disabled', 'disabled');
-      })
-    });
-  </script>
+          if (response.erro) {
+            $("#response").html('<div class="alert alert-danger">' + response.erro + '</div>');
+
+            if (response.erros_model) {
+              $.each(response.erros_model, function(key, value) {
+                $("#response").append('<ul class="list-unstyled"><li class="text-danger">' + value + '</li></ul>')
+              });
+            }
+          }
+        },
+        error: function() {
+          alert('Não foi possivel processar a solicitação. Por favor entre em contato com o suporte técnico.');
+          $("#btn-login").val('Entrar');
+          $("#btn-login").removeAttr("disabled");
+        }
+      });
+    })
+
+    $("#form").submit(function() {
+      $(this).find(":submit").attr('disabled', 'disabled');
+    })
+  });
+</script>
 
 <?php $this->endSection(); ?>
