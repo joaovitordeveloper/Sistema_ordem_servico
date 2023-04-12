@@ -30,8 +30,8 @@ class Home extends BaseController
     {
         $email = service('email');
 
-        $email->setFrom('teste@allinsystems.com.br', 'Ordem de serviço LTDA');//de onde vai sair o e-mail
-        $email->setTo('developer.joaovitor@gmail.com');//pra quem vai o e-mail
+        $email->setFrom('no-reply@allinsystems.com.br', 'Ordem de serviço LTDA');//de onde vai sair o e-mail
+        $email->setTo('teste@allinsystems.com.br');//pra quem vai o e-mail
 
         $email->setSubject('Recuperação de senha');
         $email->setMessage('Iniciando a recuperação de senha');
@@ -41,7 +41,5 @@ class Home extends BaseController
         }else{
             echo $email->printDebugger();
         }
-
-        
     }
 }

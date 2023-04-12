@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Libraries\Token;
 use CodeIgniter\Model;
 
 class UsuarioModel extends Model
@@ -99,5 +100,31 @@ class UsuarioModel extends Model
                     ->where('usuarios.id', $usuario_id)
                     ->groupBy('permissoes.nome')
                     ->findAll();
+    }
+
+    /**
+     * Método que recupera o usuario de acordo com o hash do token
+     *
+     * @param Type|null $var
+     * @return null|object
+     */
+    public function buscaUsuarioParaRedefinirSenha(string $token)
+    {
+        $token = new Token($token);
+        $tokenHash = $token->getHash();
+
+        $usuario = $this->where('reset_hash', $tokenHash)
+                        ->where('deletado_em', null)
+                        ->first();
+                       
+        if ($usuario === null) {
+            return null;
+        }      
+        
+        if ($usuario->reset_expira_em < date('Y-m-d H:i:s')) {
+            return null;
+        }
+
+        return $usuario;
     }
 }
